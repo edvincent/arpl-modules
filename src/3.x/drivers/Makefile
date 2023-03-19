@@ -15,7 +15,7 @@
 #obj-$(CONFIG_PCI)		+= pci/
 #obj-$(CONFIG_PARISC)		+= parisc/
 #obj-$(CONFIG_RAPIDIO)		+= rapidio/
-obj-y				+= video/
+#obj-y				+= video/  # Has dependency cycle! bug remark 2023.03.19
 #obj-y				+= idle/
 
 # IPMI must come before ACPI in order to provide IPMI opregion support
