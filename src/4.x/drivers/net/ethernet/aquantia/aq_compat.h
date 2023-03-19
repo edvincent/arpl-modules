@@ -104,7 +104,7 @@ static inline void page_ref_inc(struct page *page)
 	atomic_inc(&page->_count);
 }
 
-static inline int page_ref_count(struct page *page)
+static inline int page_ref_count1(struct page *page)
 {
 	return atomic_read(&page->_count);
 }
