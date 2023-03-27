@@ -121,7 +121,7 @@ obj-m		+= sata_sil.o
 # Should be last libata driver
 #obj-$(CONFIG_PATA_LEGACY)	+= pata_legacy.o
 
-libata-y	:= libata-eh.o
+libata-y	:= libata-eh.o  libata-transport.o
 #libata-y	:= libata-core.o libata-scsi.o libata-eh.o \
 #	libata-transport.o libata-trace.o
 libata-y	+= libata-sata.o
