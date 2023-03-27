@@ -121,7 +121,7 @@ static int ax88172a_init_mdio(struct usbnet *dev)
 #if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 //do nothing
 #else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
-	priv->mdio_irq = kzalloc(sizeof(int) * PHY_MAX_ADDR, GFP_KERNEL);
+	priv->mdio = kzalloc(sizeof(int) * PHY_MAX_ADDR, GFP_KERNEL);
 	if (!priv->mdio->irq) {
 		ret = -ENOMEM;
 		goto mfree;
