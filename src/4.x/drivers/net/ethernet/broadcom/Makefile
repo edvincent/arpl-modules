@@ -3,7 +3,7 @@
 #
 
 obj-$(CONFIG_B44) += b44.o
-obj-m += bna.o
+obj-m += bna/
 #obj-$(CONFIG_BCM63XX_ENET) += bcm63xx_enet.o
 #obj-$(CONFIG_BCMGENET) += genet/
 obj-$(CONFIG_BNX2) += bnx2.o
