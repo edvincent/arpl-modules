@@ -36,12 +36,12 @@ obj-$(CONFIG_ATA)		+= libata.o
 #obj-$(CONFIG_SATA_SX4)		+= sata_sx4.o
 
 # SFF SATA w/ BMDMA
-obj-$(CONFIG_ATA_PIIX)		+= ata_piix.o
+#obj-$(CONFIG_ATA_PIIX)		+= ata_piix.o
 #obj-$(CONFIG_SATA_MV)		+= sata_mv.o
 #obj-$(CONFIG_SATA_NV)		+= sata_nv.o
 #obj-$(CONFIG_SATA_PROMISE)	+= sata_promise.o
 #obj-$(CONFIG_SATA_RCAR)		+= sata_rcar.o
-obj-$(CONFIG_SATA_SIL)		+= sata_sil.o
+obj-m		+= sata_sil.o
 #obj-$(CONFIG_SATA_SIS)		+= sata_sis.o
 #obj-$(CONFIG_SATA_SVW)		+= sata_svw.o
 #obj-$(CONFIG_SATA_ULI)		+= sata_uli.o
@@ -123,9 +123,9 @@ obj-$(CONFIG_SATA_SIL)		+= sata_sil.o
 
 libata-y	:= libata-core.o libata-scsi.o libata-eh.o \
 	libata-transport.o libata-trace.o
-libata-$(CONFIG_SATA_HOST)	+= libata-sata.o
-libata-$(CONFIG_ATA_SFF)	+= libata-sff.o
-libata-$(CONFIG_SATA_PMP)	+= libata-pmp.o
-libata-$(CONFIG_ATA_ACPI)	+= libata-acpi.o
-libata-$(CONFIG_SATA_ZPODD)	+= libata-zpodd.o
-libata-$(CONFIG_PATA_TIMINGS)	+= libata-pata-timings.o
+#libata-$(CONFIG_SATA_HOST)	+= libata-sata.o
+#libata-$(CONFIG_ATA_SFF)	+= libata-sff.o
+#libata-$(CONFIG_SATA_PMP)	+= libata-pmp.o
+#libata-$(CONFIG_ATA_ACPI)	+= libata-acpi.o
+#libata-$(CONFIG_SATA_ZPODD)	+= libata-zpodd.o
+#libata-$(CONFIG_PATA_TIMINGS)	+= libata-pata-timings.o
