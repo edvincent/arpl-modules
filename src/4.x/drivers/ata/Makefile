@@ -123,9 +123,9 @@ obj-m		+= sata_sil.o
 
 libata-y	:= libata-core.o libata-scsi.o libata-eh.o \
 	libata-transport.o libata-trace.o
-#libata-$(CONFIG_SATA_HOST)	+= libata-sata.o
-#libata-$(CONFIG_ATA_SFF)	+= libata-sff.o
-#libata-$(CONFIG_SATA_PMP)	+= libata-pmp.o
-#libata-$(CONFIG_ATA_ACPI)	+= libata-acpi.o
-#libata-$(CONFIG_SATA_ZPODD)	+= libata-zpodd.o
-#libata-$(CONFIG_PATA_TIMINGS)	+= libata-pata-timings.o
+libata-y	+= libata-sata.o
+libata-y	+= libata-sff.o
+libata-y	+= libata-pmp.o
+libata-y	+= libata-acpi.o
+libata-y	+= libata-zpodd.o
+libata-y	+= libata-pata-timings.o
