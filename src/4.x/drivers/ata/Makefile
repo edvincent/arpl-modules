@@ -38,7 +38,7 @@
 # SFF SATA w/ BMDMA
 #obj-$(CONFIG_ATA_PIIX)		+= ata_piix.o
 #obj-$(CONFIG_SATA_MV)		+= sata_mv.o
-#obj-$(CONFIG_SATA_NV)		+= sata_nv.o
+obj-m		+= sata_nv.o
 #obj-$(CONFIG_SATA_PROMISE)	+= sata_promise.o
 #obj-$(CONFIG_SATA_RCAR)		+= sata_rcar.o
 obj-m		+= sata_sil.o
