@@ -205,7 +205,7 @@ int mlx4_bf_alloc(struct mlx4_dev *dev, struct mlx4_bf *bf, int node)
 			goto free_uar;
 		}
 
-		uar->bf_map = io_mapping_map_wc(priv->bf_mapping, 0, uar->index << PAGE_SHIFT);
+		uar->bf_map = io_mapping_map_wc(priv->bf_mapping, uar->index << PAGE_SHIFT, 0);
 		if (!uar->bf_map) {
 			err = -ENOMEM;
 			goto unamp_uar;
