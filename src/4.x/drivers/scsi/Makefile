@@ -28,7 +28,7 @@ obj-$(CONFIG_RAID_ATTRS)	+= raid_class.o
 # be initialised before drivers
 # --------------------------
 obj-$(CONFIG_SCSI_SPI_ATTRS)	+= scsi_transport_spi.o
-#obj-m	+= scsi_transport_fc.o
+obj-m	+= scsi_transport_fc.o
 #obj-$(CONFIG_SCSI_ISCSI_ATTRS)	+= scsi_transport_iscsi.o
 obj-$(CONFIG_SCSI_SAS_ATTRS)	+= scsi_transport_sas.o
 obj-$(CONFIG_SCSI_SAS_LIBSAS)	+= libsas/
