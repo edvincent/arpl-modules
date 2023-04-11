@@ -27,10 +27,10 @@ obj-$(CONFIG_RAID_ATTRS)	+= raid_class.o
 # For kernel non-modular link, transport attributes need to
 # be initialised before drivers
 # --------------------------
-obj-$(CONFIG_SCSI_SPI_ATTRS)	+= scsi_transport_spi.o
-obj-m	+= scsi_transport_fc.o
+obj-m	+= scsi_transport_spi/
+obj-m	+= scsi_transport_fc/
 #obj-$(CONFIG_SCSI_ISCSI_ATTRS)	+= scsi_transport_iscsi.o
-obj-$(CONFIG_SCSI_SAS_ATTRS)	+= scsi_transport_sas.o
+obj-m	+= scsi_transport_sas/
 obj-$(CONFIG_SCSI_SAS_LIBSAS)	+= libsas/
 #obj-$(CONFIG_SCSI_SRP_ATTRS)	+= scsi_transport_srp.o
 #obj-$(CONFIG_SCSI_DH)		+= device_handler/
