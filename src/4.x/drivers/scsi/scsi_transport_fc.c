@@ -529,7 +529,7 @@ fc_host_post_event(struct Scsi_Host *shost, u32 event_number,
 	u32 len;
 	int err;
 
-	if (!scsi_nl_hdr) {
+	if (!scsi_nl_sock) {
 		err = -ENOENT;
 		goto send_fail;
 	}
@@ -596,7 +596,7 @@ fc_host_post_vendor_event(struct Scsi_Host *shost, u32 event_number,
 	u32 len;
 	int err;
 
-	if (!scsi_nl_hdr) {
+	if (!scsi_nl_sock) {
 		err = -ENOENT;
 		goto send_vendor_fail;
 	}
