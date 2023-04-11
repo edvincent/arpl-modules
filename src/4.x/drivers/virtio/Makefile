@@ -6,5 +6,5 @@ virtio_pci-m    += virtio_pci_legacy.o
 obj-m           += virtio_net.o
 obj-m           += virtio_scsi.o
 obj-m           += virtio_blk.o
-obj-m += virtio_balloon.o
-obj-m += virtio_input.o
+obj-$(CONFIG_VIRTIO_BALLOON) += virtio_balloon.o
+obj-$(CONFIG_VIRTIO_INPUT) += virtio_input.o
