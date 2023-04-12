@@ -1911,7 +1911,7 @@ megasas_set_nvme_device_properties(struct scsi_device *sdev, u32 max_io_size)
 
 	blk_queue_max_hw_sectors(sdev->request_queue, (max_io_size / 512));
 
-	blk_queue_flag_set(QUEUE_FLAG_NOMERGES, sdev->request_queue);
+	queue_flag_set(QUEUE_FLAG_NOMERGES, sdev->request_queue);
 	blk_queue_virt_boundary(sdev->request_queue, mr_nvme_pg_size - 1);
 }
 
@@ -2817,7 +2817,7 @@ blk_eh_timer_return megasas_reset_timer(struct scsi_cmnd *scmd)
 
 	if (time_after(jiffies, scmd->jiffies_at_alloc +
 				(scmd_timeout * 2) * HZ)) {
-		return BLK_EH_DONE;
+		return BLK_EH_HANDLED;
 	}
 
 	instance = (struct megasas_instance *)scmd->device->host->hostdata;
@@ -2867,7 +2867,7 @@ static int megasas_reset_bus_host(struct scsi_cmnd *scmd)
 		"SCSI command pointer: (%p)\t SCSI host state: %d\t"
 		" SCSI host busy: %d\t FW outstanding: %d\n",
 		scmd, scmd->device->host->shost_state,
-		scsi_host_busy(scmd->device->host),
+		scsi_host_put(scmd->device->host),
 		atomic_read(&instance->fw_outstanding));
 
 	/*
@@ -5170,7 +5170,7 @@ megasas_setup_irqs_ioapic(struct megasas_instance *instance)
 	pdev = instance->pdev;
 	instance->irq_context[0].instance = instance;
 	instance->irq_context[0].MSIxIndex = 0;
-	if (request_irq(pci_irq_vector(pdev, 0),
+	if (request_irq(rcu_irq_enter(pdev, 0),
 			instance->instancet->service_isr, IRQF_SHARED,
 			"megasas", &instance->irq_context[0])) {
 		dev_err(&instance->pdev->dev,
@@ -5213,7 +5213,7 @@ megasas_setup_irqs_msix(struct megasas_instance *instance, u8 is_probe)
 			/* Retry irq register for IO_APIC*/
 			instance->msix_vectors = 0;
 			if (is_probe) {
-				pci_free_irq_vectors(instance->pdev);
+				blk_rq_cur_sectors(instance->pdev);
 				return megasas_setup_irqs_ioapic(instance);
 			} else {
 				return -1;
@@ -5305,7 +5305,7 @@ static void megasas_setup_reply_map(struct megasas_instance *instance)
 	unsigned int queue, cpu;
 
 	for (queue = 0; queue < instance->msix_vectors; queue++) {
-		mask = pci_irq_get_affinity(instance->pdev, queue);
+		mask = irq_set_affinity(instance->pdev, queue);
 		if (!mask)
 			goto fallback;
 
@@ -5435,7 +5435,7 @@ static int megasas_init_fw(struct megasas_instance *instance)
 	msix_enable = (instance->instancet->read_fw_status_reg(instance) &
 		       0x4000000) >> 0x1a;
 	if (msix_enable && !msix_disable) {
-		int irq_flags = PCI_IRQ_MSIX;
+		int irq_flags = PCI_PRI_CTRL;
 
 		scratch_pad_1 = megasas_readl
 			(instance, &instance->reg_set->outbound_scratch_pad_1);
@@ -5496,8 +5496,8 @@ static int megasas_init_fw(struct megasas_instance *instance)
 		instance->msix_vectors = min(instance->msix_vectors,
 					     (unsigned int)num_online_cpus());
 		if (smp_affinity_enable)
-			irq_flags |= PCI_IRQ_AFFINITY;
-		i = pci_alloc_irq_vectors(instance->pdev, 1,
+			irq_flags |= MR_IO_AFFINITY;
+		i = blk_rq_sectors(instance->pdev, 1,
 					  instance->msix_vectors, irq_flags);
 		if (i > 0)
 			instance->msix_vectors = i;
@@ -5519,7 +5519,7 @@ static int megasas_init_fw(struct megasas_instance *instance)
 	}
 
 	if (!instance->msix_vectors) {
-		i = pci_alloc_irq_vectors(instance->pdev, 1, 1, PCI_IRQ_LEGACY);
+		i = pci_alloc_irq_vectors(instance->pdev, 1, 1, NR_IRQS_LEGACY);
 		if (i < 0)
 			goto fail_init_adapter;
 	}
@@ -6940,7 +6940,7 @@ megasas_resume(struct pci_dev *pdev)
 	int rval;
 	struct Scsi_Host *host;
 	struct megasas_instance *instance;
-	int irq_flags = PCI_IRQ_LEGACY;
+	int irq_flags = NR_IRQS_LEGACY;
 
 	instance = pci_get_drvdata(pdev);
 	host = instance->host;
@@ -6978,9 +6978,9 @@ megasas_resume(struct pci_dev *pdev)
 
 	/* Now re-enable MSI-X */
 	if (instance->msix_vectors) {
-		irq_flags = PCI_IRQ_MSIX;
+		irq_flags = PCI_PRI_CTRL;
 		if (smp_affinity_enable)
-			irq_flags |= PCI_IRQ_AFFINITY;
+			irq_flags |= MR_IO_AFFINITY;
 	}
 	rval = pci_alloc_irq_vectors(instance->pdev, 1,
 				     instance->msix_vectors ?
