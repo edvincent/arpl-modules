@@ -58,7 +58,6 @@
 #include "megaraid_sas_fusion.h"
 #include "megaraid_sas.h"
 
-
 extern void megasas_free_cmds(struct megasas_instance *instance);
 extern struct megasas_cmd *megasas_get_cmd(struct megasas_instance
 					   *instance);
@@ -92,8 +91,6 @@ void megasas_start_timer(struct megasas_instance *instance,
 			 void *fn, unsigned long interval);
 extern struct megasas_mgmt_info megasas_mgmt_info;
 extern int resetwaittime;
-
-
 
 /**
  * megasas_enable_intr_fusion -	Enables interrupts
@@ -201,10 +198,10 @@ megasas_fire_cmd_fusion(struct megasas_instance *instance,
 		&instance->reg_set->inbound_low_queue_port);
 	writel(le32_to_cpu(req_desc->u.high),
 		&instance->reg_set->inbound_high_queue_port);
+	mmiowb();
 	spin_unlock_irqrestore(&instance->hba_lock, flags);
 #endif
 }
-
 
 /**
  * megasas_teardown_frame_pool_fusion -	Destroy the cmd frame DMA pool
@@ -265,7 +262,6 @@ megasas_free_cmds_fusion(struct megasas_instance *instance)
 
 	u32 max_cmds, req_sz, reply_sz, io_frames_sz;
 
-
 	req_sz = fusion->request_alloc_sz;
 	reply_sz = fusion->reply_alloc_sz;
 	io_frames_sz = fusion->io_frames_alloc_sz;
@@ -319,7 +315,6 @@ static int megasas_create_frame_pool_fusion(struct megasas_instance *instance)
 
 	fusion = instance->ctrl_context;
 	max_cmd = instance->max_fw_cmds;
-
 
 	/*
 	 * Use DMA pool facility provided by PCI layer
@@ -1855,6 +1850,8 @@ megasas_build_syspd_fusion(struct megasas_instance *instance,
 		io_request->DevHandle = pd_sync->seq[pd_index].devHandle;
 		pRAID_Context->regLockFlags |=
 			(MR_RL_FLAGS_SEQ_NUM_ENABLE|MR_RL_FLAGS_GRANT_DESTINATION_CUDA);
+		pRAID_Context->Type = MPI2_TYPE_CUDA;
+		pRAID_Context->nseg = 0x1;
 	} else if (fusion->fast_path_io) {
 		pRAID_Context->VirtualDiskTgtId = cpu_to_le16(device_id);
 		pRAID_Context->configSeqNum = 0;
@@ -1873,7 +1870,6 @@ megasas_build_syspd_fusion(struct megasas_instance *instance,
 		instance->msix_vectors ?
 		(raw_smp_processor_id() % instance->msix_vectors) : 0;
 
-
 	if (!fp_possible) {
 		/* system pd firmware path */
 		io_request->Function  = MEGASAS_MPI2_FUNCTION_LD_IO_REQUEST;
@@ -1890,12 +1886,10 @@ megasas_build_syspd_fusion(struct megasas_instance *instance,
 		pRAID_Context->timeoutValue =
 			cpu_to_le16((os_timeout_value > timeout_limit) ?
 			timeout_limit : os_timeout_value);
-		if (fusion->adapter_type == INVADER_SERIES) {
-			pRAID_Context->Type = MPI2_TYPE_CUDA;
-			pRAID_Context->nseg = 0x1;
+		if (fusion->adapter_type == INVADER_SERIES)
 			io_request->IoFlags |=
 				cpu_to_le16(MPI25_SAS_DEVICE0_FLAGS_ENABLED_FAST_PATH);
-		}
+
 		cmd->request_desc->SCSIIO.RequestFlags =
 			(MPI2_REQ_DESCRIPT_FLAGS_HIGH_PRIORITY <<
 				MEGASAS_REQ_DESCRIPT_FLAGS_TYPE_SHIFT);
@@ -2437,7 +2431,7 @@ megasas_release_fusion(struct megasas_instance *instance)
 
 	iounmap(instance->reg_set);
 
-	pci_release_selected_regions(instance->pdev, instance->bar);
+	pci_release_selected_regions(instance->pdev, 1<<instance->bar);
 }
 
 /**
@@ -2647,6 +2641,7 @@ int megasas_wait_for_outstanding_fusion(struct megasas_instance *instance,
 		dev_err(&instance->pdev->dev, "pending commands remain after waiting, "
 		       "will reset adapter scsi%d.\n",
 		       instance->host->host_no);
+		*convert = 1;
 		retval = 1;
 	}
 out:
@@ -2996,7 +2991,6 @@ void  megasas_fusion_crash_dump_wq(struct work_struct *work)
 	u32 status_reg;
 	u8 partial_copy = 0;
 
-
 	status_reg = instance->instancet->read_fw_status_reg(instance->reg_set);
 
 	/*
@@ -3054,7 +3048,6 @@ void  megasas_fusion_crash_dump_wq(struct work_struct *work)
 		readl(&instance->reg_set->outbound_scratch_pad);
 	}
 }
-
 
 /* Fusion OCR work queue */
 void megasas_fusion_ocr_wq(struct work_struct *work)
