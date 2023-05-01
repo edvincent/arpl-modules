@@ -30,7 +30,7 @@ $(TARGET)-objs:=aq_main.o aq_nic.o aq_pci_func.o aq_nic.o aq_vec.o aq_ring.o aq_
         aq_hw_utils.o aq_ethtool.o aq_drvinfo.o \
         aq_trace.o \
         aq_phy.o \
-        aq_compat.o \
+#        aq_compat.o \
         aq_tsn.o \
         aq_sysfs.o \
         hw_atl/hw_atl_a0.o \
