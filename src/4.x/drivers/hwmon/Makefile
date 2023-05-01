@@ -3,7 +3,7 @@
 #
 
 #obj-$(CONFIG_HWMON)		+= hwmon.o
-obj-$(CONFIG_HWMON_VID)		+= hwmon-vid.o
+#obj-$(CONFIG_HWMON_VID)		+= hwmon-vid.o
 
 # APCI drivers
 #obj-$(CONFIG_SENSORS_ACPI_POWER) += acpi_power_meter.o
