@@ -14,8 +14,8 @@ jobs:
 
       - name: Tar modules
         run: |
-          ls -d *-*/
-          for D in `ls -d *-*/`; do
+          ls -d *-*/ | grep -v "copy-to-main/"
+          for D in `ls -d *-*/ | grep -v "copy-to-main/"`; do
             E=$(echo ${D} | sed 's#/##')
             echo "${E}"
             (cd ${E} && tar caf ../${E}.tgz *.ko)
@@ -24,9 +24,9 @@ jobs:
 
       - name: Copy to main branch
         run: |
-          mkdir -p ./copytomain
-          cp ./*.tgz ./copytomain/
-          cd ./copytomain
+          mkdir -p ./copy-to-main
+          cp ./*.tgz ./copy-to-main/
+          cd ./copy-to-main
           git config --global user.name "PeterSuh-Q3"
           git config --global user.email dante9000@gmail.com
           git add -A
