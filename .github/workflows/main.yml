@@ -22,20 +22,6 @@ jobs:
           done
           (cd firmware && tar caf ../firmware.tgz *)
 
-      - name: Copy to main branch
-        run: |
-          mkdir -p ./copy-to-main
-          cp ./*.tgz ./copy-to-main/
-          cd ./copy-to-main
-          git config --global user.name "PeterSuh-Q3"
-          git config --global user.email dante9000@gmail.com
-          git init
-          git add -A
-          git commit -m "Add release artifacts"
-          git branch -M main
-          git remote add origin https://github.com/PeterSuh-Q3/arpl-modules.git
-          git push -u origin main
-
       # Publish a release if is a tag
       - name: Release
         uses: softprops/action-gh-release@v1
