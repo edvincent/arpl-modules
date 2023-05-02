@@ -14,6 +14,7 @@ jobs:
 
       - name: Tar modules
         run: |
+          ls -d *-*
           for D in `ls -d *-*`; do
             (cd ${D} && tar caf ../${D}.tgz *.ko)
           done
