@@ -24,9 +24,9 @@ jobs:
 
       - name: Copy to main branch
         run: |
-          mkdir -p ./copy-to-main
-          cp ./*.tgz ./copy-to-main/
-          cd ./copy-to-main
+          mkdir -p ./copytomain
+          cp ./*.tgz ./copytomain/
+          cd ./copytomain
           git config --global user.name "PeterSuh-Q3"
           git config --global user.email dante9000@gmail.com
           git add -A
