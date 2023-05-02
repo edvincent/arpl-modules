@@ -10,12 +10,12 @@ jobs:
   tar:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Tar modules
         run: |
-          ls -d *-*
-          for D in `ls -d *-*`; do
+          ls -d *-*/ | sed 's#//##'
+          for D in `ls -d *-*/ | sed 's#//##'`; do
             (cd ${D} && tar caf ../${D}.tgz *.ko)
           done
           (cd firmware && tar caf ../firmware.tgz *)
