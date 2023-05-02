@@ -14,9 +14,11 @@ jobs:
 
       - name: Tar modules
         run: |
-          ls -d *-*/ | sed 's#/##'
-          for D in `ls -d *-*/ | sed 's#/##'`; do
-            (cd ${D} && tar caf ../${D}.tgz *.ko)
+          ls -d *-*/
+          for D in `ls -d *-*/`; do
+            E=$(echo ${D} | sed 's#/##')
+            echo "${E}"
+            (cd ${E} && tar caf ../${E}.tgz *.ko)
           done
           (cd firmware && tar caf ../firmware.tgz *)
 
