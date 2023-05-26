@@ -28,9 +28,9 @@ jobs:
           cat files-chksum
 
       # Publish a release if is a tag
-#      - name: Release
-#        uses: softprops/action-gh-release@v1
-#        if: startsWith(github.ref, 'refs/tags/')
-#        with:
-#          files: |
-#            *.tgz, files-chksum
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            *.tgz, files-chksum
