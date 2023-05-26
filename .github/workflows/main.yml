@@ -16,7 +16,7 @@ jobs:
         run: |
           git clone https://github.com/pocopico/redpill-modules.git
           ls -d *-*/ | grep -v "copy-to-main/"
-          for D in `ls -d *-*/ | grep -v "copy-to-main/"`; do
+          for D in `ls -d *-*/ | grep -v -e "copy-to-main/" -e "redpill-modules/"`; do
             E=$(echo ${D} | sed 's#/##')
             echo "merge pocopico's ${E}"
             cp -vf ./redpill-modules/${E}/*.ko ./${E}/
