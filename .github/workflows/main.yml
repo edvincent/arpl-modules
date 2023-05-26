@@ -21,10 +21,10 @@ jobs:
             echo "merge pocopico's ${E}"
             cp -vf ./redpill-modules/${E}/*.ko ./${E}/
             (cd ${E} && tar caf ../${E}.tgz *.ko)
-            sha256sum ../${E}.tgz | awk '{print $1}' | awk '{print $1 " '${E}.tgz' modpack.sha256"}' >> files-chksum
+            sha256sum ./${E}.tgz | awk '{print $1}' | awk '{print $1 " '${E}.tgz' modpack.sha256"}' >> files-chksum
           done
           (cd firmware && tar caf ../firmware.tgz *)
-          sha256sum ../firmware.tgz | awk '{print $1}' | awk '{print $1 " 'firmware.tgz' firmware.sha256"}' >> files-chksum
+          sha256sum ./firmware.tgz | awk '{print $1}' | awk '{print $1 " 'firmware.tgz' firmware.sha256"}' >> files-chksum
 
       # Publish a release if is a tag
 #      - name: Release
