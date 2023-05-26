@@ -25,6 +25,7 @@ jobs:
           done
           (cd firmware && tar caf ../firmware.tgz *)
           sha256sum ./firmware.tgz | awk '{print $1}' | awk '{print $1 " 'firmware.tgz' firmware.sha256"}' >> files-chksum
+          cat files-chksum
 
       # Publish a release if is a tag
 #      - name: Release
