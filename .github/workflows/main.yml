@@ -20,7 +20,7 @@ jobs:
             E=$(echo ${D} | sed 's#/##')
             echo "merge pocopico's ${E}"
             cp -vf ./redpill-modules/${E}/*.ko ./${E}/
-            [ ${E} == "epyc7002-5.10.55" ] && rm -f ./${E}/usb*.ko
+            [ ${E} == "epyc7002-5.10.55" ] && rm -f ./${E}/usb*.ko && rm -f ./${E}/xhci*.ko
             (cd ${E} && tar caf ../${E}.tgz *.ko)
             sha256sum ./${E}.tgz | awk '{print $1}' | awk '{print $1 " '${E}.tgz' modpack.sha256"}' >> files-chksum
           done
