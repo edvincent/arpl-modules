@@ -17,7 +17,7 @@ jobs:
           git clone https://github.com/pocopico/redpill-modules.git
           git clone https://github.com/wjz304/arpl-modules.git
           ls -d *-*/ | grep -v "copy-to-main/"
-          for D in `ls -d *-*/ | grep -v -e "copy-to-main/" -e "redpill-modules/"`; do
+          for D in `ls -d *-*/ | grep -v -e "copy-to-main/" -e "redpill-modules/" -e "arpl-modules/"`; do
             E=$(echo ${D} | sed 's#/##')
             if [ ${E} == "epyc7002-5.10.55" ]; then
               echo "merge wjz304's ${E}"            
