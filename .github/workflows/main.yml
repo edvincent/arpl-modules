@@ -20,8 +20,17 @@ jobs:
           for D in `ls -d *-*/ | grep -v -e "copy-to-main/" -e "redpill-modules/" -e "arpl-modules/"`; do
             E=$(echo ${D} | sed 's#/##')
             if [ ${E} == "epyc7002-5.10.55" ]; then
+              mkdir -p /tmp/${E}
+              mv -f ./${E}/*.ko /tmp/${E}/
               echo "merge wjz304's ${E}"            
-              cp -vf ./arpl-modules/official/${E}/*.ko ./${E}/            
+              cp -vf ./arpl-modules/official/${E}/*.ko ./${E}/
+              cp -vf /tmp/${E}/e1000.ko ./${E}/e1000.ko
+              cp -vf /tmp/${E}/e1000e.ko ./${E}/e1000e.ko
+              cp -vf /tmp/${E}/igc.ko ./${E}/igc.ko
+              cp -vf /tmp/${E}/r8152.ko ./${E}/r8152.ko
+              cp -vf /tmp/${E}/r8153_ecm.ko ./${E}/r8153_ecm.ko
+              cp -vf /tmp/${E}/r8168.ko ./${E}/r8168.ko
+              cp -vf /tmp/${E}/r8169.ko ./${E}/r8169.ko
             else
               echo "merge pocopico's ${E}"            
               cp -vf ./redpill-modules/${E}/*.ko ./${E}/
