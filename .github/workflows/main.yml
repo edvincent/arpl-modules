@@ -27,8 +27,8 @@ jobs:
             elif [ ${E} == "broadwellnk-4.4.302" ]; then
               echo "merge pocopico's ${E}"
               cp -vf ./redpill-modules/${E}/*.ko ./${E}/
-              #rm -f ./${E}/mlk4_core.ko
-              rm -f ./${E}/mlk4_en.ko
+              #rm -f ./${E}/mlx4_core.ko
+              rm -f ./${E}/mlx4_en.ko
             else 
               echo "merge pocopico's ${E}"
               cp -vf ./redpill-modules/${E}/*.ko ./${E}/
