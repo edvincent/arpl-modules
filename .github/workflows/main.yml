@@ -24,15 +24,13 @@ jobs:
               mv -f ./${E}/*.ko /tmp/${E}/
               echo "merge wjz304's ${E}"            
               cp -vf ./arpl-modules/official/${E}/*.ko ./${E}/
-              cp -vf /tmp/${E}/e1000.ko ./${E}/e1000.ko
-              cp -vf /tmp/${E}/e1000e.ko ./${E}/e1000e.ko
-              cp -vf /tmp/${E}/igc.ko ./${E}/igc.ko
-              cp -vf /tmp/${E}/r8152.ko ./${E}/r8152.ko
-              cp -vf /tmp/${E}/r8153_ecm.ko ./${E}/r8153_ecm.ko
-              cp -vf /tmp/${E}/r8168.ko ./${E}/r8168.ko
-              cp -vf /tmp/${E}/r8169.ko ./${E}/r8169.ko
-            else
-              echo "merge pocopico's ${E}"            
+            elif [ ${E} == "broadwellnk-4.4.302" ]; then
+              echo "merge pocopico's ${E}"
+              cp -vf ./redpill-modules/${E}/*.ko ./${E}/
+              #rm -f ./${E}/mlk4_core.ko
+              rm -f ./${E}/mlk4_en.ko
+            else 
+              echo "merge pocopico's ${E}"
               cp -vf ./redpill-modules/${E}/*.ko ./${E}/
             fi
             (cd ${E} && tar caf ../${E}.tgz *.ko)
