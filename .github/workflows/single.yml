@@ -20,8 +20,8 @@ jobs:
               mv -f ./${E}/*.ko /tmp/${E}/
               echo "merge wjz304's official ${E}"
               cp -vf ./arpl-modules/official/${E}/*.ko ./${E}/
-              echo "merge wjz304's thirdparty ${E}"              
-              [ -d ./arpl-modules/thirdparty/${E} ] && cp -vf ./arpl-modules/thirdparty/${E}/*.ko ./${E}/
+              echo "copy ${E} vanilla module"              
+              [ -d ./vanilla/${E} ] && cp -vf ./vanilla/${E}/*.ko ./${E}/
             else 
               echo "merge wjz304's official ${E}"
               cp -vf ./arpl-modules/official/${E}/*.ko ./${E}/
