@@ -24,14 +24,14 @@ jobs:
               echo "merge wjz304's official ${E}"
               cp -vf ./arpl-modules/official/${E}/*.ko ./${E}/
               echo "merge wjz304's thirdparty ${E}"              
-              [ -f ./arpl-modules/thirdparty/${E} ] && cp -vf ./arpl-modules/thirdparty/${E}/*.ko ./${E}/
+              [ -d ./arpl-modules/thirdparty/${E} ] && cp -vf ./arpl-modules/thirdparty/${E}/*.ko ./${E}/
             else 
               echo "merge wjz304's official ${E}"
               cp -vf ./arpl-modules/official/${E}/*.ko ./${E}/
               echo "merge wjz304's thirdparty ${E}"              
-              [ -f ./arpl-modules/thirdparty/${E} ] && cp -vf ./arpl-modules/thirdparty/${E}/*.ko ./${E}/
+              [ -d ./arpl-modules/thirdparty/${E} ] && cp -vf ./arpl-modules/thirdparty/${E}/*.ko ./${E}/
               echo "copy ${E} vanilla module"              
-              [ -f ./vanilla/${E} ] && cp -vf ./vanilla/${E}/*.ko ./${E}/
+              [ -d ./vanilla/${E} ] && cp -vf ./vanilla/${E}/*.ko ./${E}/
             fi
             (cd ${E} && tar caf ../${E}.tgz *.ko)
             sha256sum ./${E}.tgz | awk '{print $1}' | awk '{print $1 " '${E}.tgz' modpack.sha256"}' >> files-chksum
