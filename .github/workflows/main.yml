@@ -14,10 +14,9 @@ jobs:
 
       - name: Tar modules
         run: |
-          git clone https://github.com/pocopico/redpill-modules.git
           git clone https://github.com/wjz304/arpl-modules.git
-          ls -d *-*/ | grep -v "copy-to-main/"
-          for D in `ls -d *-*/ | grep -v -e "copy-to-main/" -e "redpill-modules/" -e "arpl-modules/"`; do
+          ls -d *-*/ | grep -v -e "copy-to-main/" -e "arpl-modules/"
+          for D in `ls -d *-*/ `; do
             E=$(echo ${D} | sed 's#/##')
             if [ ${E} == "epyc7002-5.10.55" ]; then
               mkdir -p /tmp/${E}
@@ -25,18 +24,18 @@ jobs:
               echo "merge wjz304's ${E}"            
               cp -vf ./arpl-modules/official/${E}/*.ko ./${E}/
             elif [ ${E} == "broadwellnk-4.4.302" ]; then
-              echo "merge pocopico's ${E}"
-              cp -vf ./redpill-modules/${E}/*.ko ./${E}/
-              #rm -f ./${E}/mlx4_core.ko
+              echo "merge wjz304's ${E}"
+              cp -vf ./arpl-modules/${E}/*.ko ./${E}/
+              rm -f ./${E}/mlx4_core.ko
               rm -f ./${E}/mlx4_en.ko
             elif [ ${E} == "broadwell-4.4.302" ]; then
-              echo "merge pocopico's ${E}"
-              cp -vf ./redpill-modules/${E}/*.ko ./${E}/
-              #rm -f ./${E}/mlx4_core.ko
+              echo "merge wjz304's ${E}"
+              cp -vf ./arpl-modules/${E}/*.ko ./${E}/
+              rm -f ./${E}/mlx4_core.ko
               rm -f ./${E}/mlx4_en.ko
             else 
-              echo "merge pocopico's ${E}"
-              cp -vf ./redpill-modules/${E}/*.ko ./${E}/
+              echo "merge wjz304's ${E}"
+              cp -vf ./arpl-modules/${E}/*.ko ./${E}/
             fi
             (cd ${E} && tar caf ../${E}.tgz *.ko)
             sha256sum ./${E}.tgz | awk '{print $1}' | awk '{print $1 " '${E}.tgz' modpack.sha256"}' >> files-chksum
