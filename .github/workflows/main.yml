@@ -16,7 +16,7 @@ jobs:
         run: |
           git clone https://github.com/wjz304/arpl-modules.git
           ls -d *-*/ | grep -v -e "copy-to-main/" -e "arpl-modules/"
-          for D in `ls -d *-*/ `; do
+          for D in `ls -d *-*/ | grep -v -e "copy-to-main/" -e "arpl-modules/"`; do
             E=$(echo ${D} | sed 's#/##')
             if [ ${E} == "epyc7002-5.10.55" ]; then
               mkdir -p /tmp/${E}
