@@ -1,4 +1,4 @@
-name: Tar modules
+name: Tar modules single
 
 on:
   workflow_dispatch:
@@ -33,13 +33,10 @@ jobs:
             (cd ${E} && tar caf ../${E}.tgz *.ko)
             sha256sum ./${E}.tgz | awk '{print $1}' | awk '{print $1 " '${E}.tgz' files.sha256"}' >> files-chksum
           done
-          (cd firmware && tar caf ../firmware.tgz *)
-          sha256sum ./firmware.tgz | awk '{print $1}' | awk '{print $1 " 'firmware.tgz' files.sha256"}' >> files-chksum
           cat files-chksum
           
       - name: Upload
         uses: actions/upload-artifact@v2
         with:
-          files: |
-            *.tgz, files-chksum
- 
+          name: ${E}-repack 
+          path: ./
