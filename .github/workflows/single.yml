@@ -41,5 +41,5 @@ jobs:
       - name: Upload
         uses: actions/upload-artifact@v2
         with:
-          name: ${E}-repack 
+          name: module-repack 
           path: /opt/repack
