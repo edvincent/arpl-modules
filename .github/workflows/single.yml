@@ -34,9 +34,12 @@ jobs:
             sha256sum ./${E}.tgz | awk '{print $1}' | awk '{print $1 " '${E}.tgz' files.sha256"}' >> files-chksum
           done
           cat files-chksum
+          mkdir -p /opt/repack
+          cp -vf files-chksum /opt/repack
+          cp -vf ${E}.tgz /opt/repack
           
       - name: Upload
         uses: actions/upload-artifact@v2
         with:
           name: ${E}-repack 
-          path: ./
+          path: /opt/repack
