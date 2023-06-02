@@ -43,3 +43,10 @@ jobs:
         with:
           name: module-repack 
           path: /opt/repack
+
+      - name: Trigger Workflow in Another Repository
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.ACCESS_TOKEN }}
+          repository: PeterSuh-Q3/tcrp-modules
+          event-type: trigger-workflow
