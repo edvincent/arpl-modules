@@ -17,11 +17,11 @@
 
 name: Build modules from wjz304
 
-#on:  
+on:  
   #release:
     #types: [published]
 
-  #workflow_dispatch:
+  workflow_dispatch:
     #inputs:
       #version:
         #description: 'format %y.%-m.$i or auto'
