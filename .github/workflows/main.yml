@@ -19,6 +19,5 @@ jobs:
         with:
           token: ${{ secrets.ACCESS_TOKEN }}
           repository: PeterSuh-Q3/tcrp-modules
-          workflow: update-sha256.yml
           event-type: trigger-workflow
-
+          client-payload: {}
