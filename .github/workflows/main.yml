@@ -51,7 +51,7 @@ jobs:
       - name: Trigger Workflow in Another Repository
         uses: peter-evans/repository-dispatch@v1
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.ACCESS_TOKEN }}
           repository: PeterSuh-Q3/tcrp-modules
           workflow: update-sha256.yml
           ref: main
