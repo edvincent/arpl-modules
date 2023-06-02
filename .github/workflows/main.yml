@@ -11,42 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      
 
-      - name: Tar modules
-        run: |
-          git clone https://github.com/wjz304/arpl-modules.git
-          ls -d *-*/ | grep -v -e "arpl-modules/"
-          for D in `ls -d *-*/ | grep -v -e "arpl-modules/"`; do
-            E=$(echo ${D} | sed 's#/##')
-            if [ ${E} == "epyc7002-5.10.55" ]; then
-              mkdir -p /tmp/${E}
-              mv -f ./${E}/*.ko /tmp/${E}/
-              echo "merge wjz304's official ${E}"
-              cp -vf ./arpl-modules/official/${E}/*.ko ./${E}/
-              echo "copy ${E} vanilla module"              
-              [ -d ./vanilla/${E} ] && cp -vf ./vanilla/${E}/*.ko ./${E}/
-            else 
-              echo "merge wjz304's official ${E}"
-              cp -vf ./arpl-modules/official/${E}/*.ko ./${E}/
-              echo "merge wjz304's thirdparty ${E}"              
-              [ -d ./arpl-modules/thirdparty/${E} ] && cp -vf ./arpl-modules/thirdparty/${E}/*.ko ./${E}/
-              echo "copy ${E} vanilla module"              
-              [ -d ./vanilla/${E} ] && cp -vf ./vanilla/${E}/*.ko ./${E}/
-            fi
-            (cd ${E} && tar caf ../${E}.tgz *.ko)
-            sha256sum ./${E}.tgz | awk '{print $1}' | awk '{print $1 " '${E}.tgz' modpack.sha256"}' >> files-chksum
-          done
-          (cd thirdparty/firmware && tar caf ../../firmware.tgz *)
-          sha256sum ./firmware.tgz | awk '{print $1}' | awk '{print $1 " 'firmware.tgz' firmware.sha256"}' >> files-chksum
-          cat files-chksum
-
-      # Publish a release if is a tag
-      - name: Release
-        uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
-        with:
-          files: |
-            *.tgz, files-chksum
 
       - name: Trigger Workflow in Another Repository
         uses: peter-evans/repository-dispatch@v1
@@ -54,6 +20,5 @@ jobs:
           token: ${{ secrets.ACCESS_TOKEN }}
           repository: PeterSuh-Q3/tcrp-modules
           workflow: update-sha256.yml
-          ref: main
-          #inputs: |
-            #param1: value1
+          event-type: trigger-workflow
+
