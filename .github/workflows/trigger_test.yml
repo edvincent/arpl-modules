@@ -1,0 +1,17 @@
+name: Trigger test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  tar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Trigger Workflow in Another Repository
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.ACCESS_TOKEN }}
+          repository: PeterSuh-Q3/tcrp-modules
+          event-type: trigger-workflow
