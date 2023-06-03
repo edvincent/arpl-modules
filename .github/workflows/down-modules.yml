@@ -14,7 +14,7 @@ jobs:
 
       - name: Tar modules
         run: |
-          curl -kL https://github.com/wjz304/arpl-modules/releases/lastest/download/modules.zip -o /tmp/modules.zip
+          curl -kL https://github.com/wjz304/arpl-modules/releases/latest/download/modules.zip -o /tmp/modules.zip
           ls -d *-*/ | grep -v -e "arpl-modules/"
           for D in `ls -d *-*/`; do
             E=$(echo ${D} | sed 's#/##')
