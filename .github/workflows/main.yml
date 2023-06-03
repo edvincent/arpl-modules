@@ -14,25 +14,18 @@ jobs:
 
       - name: Tar modules
         run: |
-          git clone https://github.com/wjz304/arpl-modules.git
+          curl -kL https://github.com/wjz304/arpl-modules/releases/latest/download/modules.zip -o /tmp/modules.zip
+          echo "extract wjz304's modules.zip ${E}"
+          unzip /tmp/modules.zip -d "/tmp/" >/dev/null 2>&1
           ls -d *-*/ | grep -v -e "arpl-modules/"
-          for D in `ls -d *-*/ | grep -v -e "arpl-modules/"`; do
+          for D in `ls -d *-*/`; do
             E=$(echo ${D} | sed 's#/##')
-            if [ ${E} == "epyc7002-5.10.55" ]; then
-              mkdir -p /tmp/${E}
-              mv -f ./${E}/*.ko /tmp/${E}/
-              echo "merge wjz304's official ${E}"
-              cp -vf ./arpl-modules/official/${E}/*.ko ./${E}/
-              echo "copy ${E} vanilla module"              
-              [ -d ./vanilla/${E} ] && cp -vf ./vanilla/${E}/*.ko ./${E}/
-            else 
-              echo "merge wjz304's official ${E}"
-              cp -vf ./arpl-modules/official/${E}/*.ko ./${E}/
-              echo "merge wjz304's thirdparty ${E}"              
-              [ -d ./arpl-modules/thirdparty/${E} ] && cp -vf ./arpl-modules/thirdparty/${E}/*.ko ./${E}/
-              echo "copy ${E} vanilla module"              
-              [ -d ./vanilla/${E} ] && cp -vf ./vanilla/${E}/*.ko ./${E}/
-            fi
+            echo "clean ${E} directory"
+            rm -f ./${E}/*
+            echo "extract ${E} wjz304's module pack"
+            tar -xaf /tmp/${E}.tgz -C ./${E}/
+            echo "copy ${E} vanilla module"
+            [ -d ./vanilla/${E} ] && cp -vf ./vanilla/${E}/*.ko ./${E}/
             (cd ${E} && tar caf ../${E}.tgz *.ko)
             sha256sum ./${E}.tgz | awk '{print $1}' | awk '{print $1 " '${E}.tgz' modpack.sha256"}' >> files-chksum
           done
