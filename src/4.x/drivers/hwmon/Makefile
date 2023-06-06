@@ -3,7 +3,7 @@
 #
 
 #obj-$(CONFIG_HWMON)		+= hwmon.o
-#obj-$(CONFIG_HWMON_VID)		+= hwmon-vid.o
+obj-$(CONFIG_HWMON_VID)		+= hwmon-vid.o
 
 # APCI drivers
 #obj-$(CONFIG_SENSORS_ACPI_POWER) += acpi_power_meter.o
@@ -51,7 +51,7 @@
 #obj-$(CONFIG_SENSORS_DA9052_ADC)+= da9052-hwmon.o
 #obj-$(CONFIG_SENSORS_DA9055)+= da9055-hwmon.o
 #obj-$(CONFIG_SENSORS_DELL_SMM)	+= dell-smm-hwmon.o
-#obj-$(CONFIG_SENSORS_DME1737)	+= dme1737.o
+obj-$(CONFIG_SENSORS_DME1737)	+= dme1737.o
 #obj-$(CONFIG_SENSORS_DS620)	+= ds620.o
 #obj-$(CONFIG_SENSORS_DS1621)	+= ds1621.o
 #obj-$(CONFIG_SENSORS_EMC1403)	+= emc1403.o

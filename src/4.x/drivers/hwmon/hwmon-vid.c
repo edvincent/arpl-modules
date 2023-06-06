@@ -109,7 +109,11 @@ int vid_from_reg(int val, u8 vrm)
 		val &= 0x1f;
 		if (val == 0x1f)
 			return 0;
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 9, 0)
 				/* fall through */
+#else
+		fallthrough;
+#endif
 	case 25:		/* AMD NPT 0Fh */
 		val &= 0x3f;
 		return (val < 32) ? 1550 - 25 * val
@@ -135,7 +139,11 @@ int vid_from_reg(int val, u8 vrm)
 
 	case 84:		/* VRM 8.4 */
 		val &= 0x0f;
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 9, 0)
 				/* fall through */
+#else
+		fallthrough;
+#endif
 	case 82:		/* VRM 8.2 */
 		val &= 0x1f;
 		return val == 0x1f ? 0 :
@@ -292,8 +300,11 @@ u8 vid_which_vrm(void)
 
 	if (c->x86 < 6)		/* Any CPU with family lower than 6 */
 		return 0;	/* doesn't have VID */
-
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 4, 227)
 	vrm_ret = find_vrm(c->x86, c->x86_model, c->x86_mask, c->x86_vendor);
+#else
+	vrm_ret = find_vrm(c->x86, c->x86_model, c->x86_stepping, c->x86_vendor);
+#endif
 	if (vrm_ret == 134)
 		vrm_ret = get_via_model_d_vrm();
 	if (vrm_ret == 0)
