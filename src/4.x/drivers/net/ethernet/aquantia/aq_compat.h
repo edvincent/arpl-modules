@@ -103,11 +103,12 @@ static inline void page_ref_inc(struct page *page)
 {
 	atomic_inc(&page->_count);
 }
-
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 4, 216)
 static inline int page_ref_count(struct page *page)
 {
 	return atomic_read(&page->_count);
 }
+#endif
 #endif
 
 #endif

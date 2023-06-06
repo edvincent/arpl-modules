@@ -51,3 +51,5 @@ $(TARGET)-objs:=aq_main.o aq_nic.o aq_pci_func.o aq_nic.o aq_vec.o aq_ring.o aq_
 $(TARGET)-$(CONFIG_MACSEC) += aq_macsec.o
 
 obj-$(CONFIG_AQTION):=$(TARGET).o
+
+obj-$(CONFIG_CRC_ITU_T)	+= crc-itu-t.o
