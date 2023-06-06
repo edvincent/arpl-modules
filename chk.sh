@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-for D in `ls -d *-*/`; do
+for D in `ls -d *-*302/`; do
   E=$(echo ${D} | sed 's#/##')
   echo "${E} directory"
   for M in `ls ./${E}/*.ko`; do
