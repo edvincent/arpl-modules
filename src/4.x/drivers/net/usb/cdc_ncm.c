@@ -58,6 +58,11 @@ static bool prefer_mbim = true;
 #else
 static bool prefer_mbim;
 #endif
+
+#if !defined(CDC_NCM_FLAG_RESET_NTB16)
+#define CDC_NCM_FLAG_RESET_NTB16	0x08	/* set NDP16 one more time after altsetting switch */
+#endif
+
 module_param(prefer_mbim, bool, S_IRUGO | S_IWUSR);
 MODULE_PARM_DESC(prefer_mbim, "Prefer MBIM setting on dual NCM/MBIM functions");
 
