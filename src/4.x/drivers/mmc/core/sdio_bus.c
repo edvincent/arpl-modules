@@ -280,6 +280,7 @@ struct sdio_func *sdio_alloc_func(struct mmc_card *card)
 	func = kzalloc(sizeof(struct sdio_func), GFP_KERNEL);
 	if (!func)
 		return ERR_PTR(-ENOMEM);
+
 #if KERNEL_VERSION(4, 4, 91) <= LINUX_VERSION_CODE
 	/*
 	 * allocate buffer separately to make sure it's properly aligned for
