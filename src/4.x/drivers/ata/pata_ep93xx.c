@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: GPL-2.0-only
 /*
  * EP93XX PATA controller driver.
  *
@@ -45,7 +44,7 @@
 #include <linux/ktime.h>
 
 #include <linux/platform_data/dma-ep93xx.h>
-#include <linux/soc/cirrus/ep93xx.h>
+#include <mach/platform.h>
 
 #define DRV_NAME	"ep93xx-ide"
 #define DRV_VERSION	"1.0"
@@ -416,8 +415,8 @@ static void ep93xx_pata_tf_read(struct ata_port *ap, struct ata_taskfile *tf)
 {
 	struct ep93xx_pata_data *drv_data = ap->host->private_data;
 
-	tf->status = ep93xx_pata_check_status(ap);
-	tf->error = ep93xx_pata_read_reg(drv_data, IDECTRL_ADDR_FEATURE);
+	tf->command = ep93xx_pata_check_status(ap);
+	tf->feature = ep93xx_pata_read_reg(drv_data, IDECTRL_ADDR_FEATURE);
 	tf->nsect = ep93xx_pata_read_reg(drv_data, IDECTRL_ADDR_NSECT);
 	tf->lbal = ep93xx_pata_read_reg(drv_data, IDECTRL_ADDR_LBAL);
 	tf->lbam = ep93xx_pata_read_reg(drv_data, IDECTRL_ADDR_LBAM);
@@ -475,11 +474,11 @@ static void ep93xx_pata_set_devctl(struct ata_port *ap, u8 ctl)
 }
 
 /* Note: original code is ata_sff_data_xfer */
-static unsigned int ep93xx_pata_data_xfer(struct ata_queued_cmd *qc,
+static unsigned int ep93xx_pata_data_xfer(struct ata_device *adev,
 					  unsigned char *buf,
 					  unsigned int buflen, int rw)
 {
-	struct ata_port *ap = qc->dev->link->ap;
+	struct ata_port *ap = adev->link->ap;
 	struct ep93xx_pata_data *drv_data = ap->host->private_data;
 	u16 *data = (u16 *)buf;
 	unsigned int words = buflen >> 1;
@@ -855,6 +854,7 @@ static void ep93xx_pata_drain_fifo(struct ata_queued_cmd *qc)
 		     && count < 65536; count += 2)
 		ep93xx_pata_read_reg(drv_data, IDECTRL_ADDR_DATA);
 
+	/* Can become DEBUG later */
 	if (count)
 		ata_port_dbg(ap, "drained %d bytes to clear DRQ.\n", count);
 
@@ -931,7 +931,8 @@ static int ep93xx_pata_probe(struct platform_device *pdev)
 		goto err_rel_gpio;
 	}
 
-	ide_base = devm_platform_get_and_ioremap_resource(pdev, 0, &mem_res);
+	mem_res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+	ide_base = devm_ioremap_resource(&pdev->dev, mem_res);
 	if (IS_ERR(ide_base)) {
 		err = PTR_ERR(ide_base);
 		goto err_rel_gpio;
@@ -943,6 +944,7 @@ static int ep93xx_pata_probe(struct platform_device *pdev)
 		goto err_rel_gpio;
 	}
 
+	platform_set_drvdata(pdev, drv_data);
 	drv_data->pdev = pdev;
 	drv_data->ide_base = ide_base;
 	drv_data->udma_in_phys = mem_res->start + IDEUDMADATAIN;

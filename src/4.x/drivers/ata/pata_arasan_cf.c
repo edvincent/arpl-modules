@@ -39,7 +39,6 @@
 #include <linux/spinlock.h>
 #include <linux/types.h>
 #include <linux/workqueue.h>
-#include <trace/events/libata.h>
 
 #define DRIVER_NAME	"arasan_cf"
 #define TIMEOUT		msecs_to_jiffies(3000)
@@ -220,6 +219,7 @@ struct arasan_cf_dev {
 
 static struct scsi_host_template arasan_cf_sht = {
 	ATA_BASE_SHT(DRIVER_NAME),
+	.sg_tablesize = SG_NONE,
 	.dma_boundary = 0xFFFFFFFFUL,
 };
 
@@ -527,10 +527,9 @@ static void data_xfer(struct work_struct *work)
 
 	/* request dma channels */
 	/* dma_request_channel may sleep, so calling from process context */
-	acdev->dma_chan = dma_request_chan(acdev->host->dev, "data");
-	if (IS_ERR(acdev->dma_chan)) {
+	acdev->dma_chan = dma_request_slave_channel(acdev->host->dev, "data");
+	if (!acdev->dma_chan) {
 		dev_err(acdev->host->dev, "Unable to get dma_chan\n");
-		acdev->dma_chan = NULL;
 		goto chan_request_fail;
 	}
 
@@ -541,7 +540,6 @@ static void data_xfer(struct work_struct *work)
 	}
 
 	dma_release_channel(acdev->dma_chan);
-	acdev->dma_chan = NULL;
 
 	/* data xferred successfully */
 	if (!ret) {
@@ -567,7 +565,7 @@ chan_request_fail:
 	qc->ap->hsm_task_state = HSM_ST_ERR;
 
 	cf_ctrl_reset(acdev);
-	spin_unlock_irqrestore(&acdev->host->lock, flags);
+	spin_unlock_irqrestore(qc->ap->lock, flags);
 sff_intr:
 	dma_complete(acdev);
 }
@@ -704,11 +702,9 @@ static unsigned int arasan_cf_qc_issue(struct ata_queued_cmd *qc)
 	case ATA_PROT_DMA:
 		WARN_ON_ONCE(qc->tf.flags & ATA_TFLAG_POLLING);
 
-		trace_ata_tf_load(ap, &qc->tf);
 		ap->ops->sff_tf_load(ap, &qc->tf);
 		acdev->dma_status = 0;
 		acdev->qc = qc;
-		trace_ata_bmdma_start(ap, &qc->tf, qc->tag);
 		arasan_cf_dma_start(acdev);
 		ap->hsm_task_state = HSM_ST_LAST;
 		break;
@@ -800,7 +796,7 @@ static int arasan_cf_probe(struct platform_device *pdev)
 	struct resource *res;
 	u32 quirk;
 	irq_handler_t irq_handler = NULL;
-	int ret;
+	int ret = 0;
 
 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
 	if (!res)
@@ -813,8 +809,10 @@ static int arasan_cf_probe(struct platform_device *pdev)
 	}
 
 	acdev = devm_kzalloc(&pdev->dev, sizeof(*acdev), GFP_KERNEL);
-	if (!acdev)
+	if (!acdev) {
+		dev_warn(&pdev->dev, "kzalloc fail\n");
 		return -ENOMEM;
+	}
 
 	if (pdata)
 		quirk = pdata->quirk;
@@ -836,7 +834,7 @@ static int arasan_cf_probe(struct platform_device *pdev)
 	}
 
 	acdev->pbase = res->start;
-	acdev->vbase = devm_ioremap(&pdev->dev, res->start,
+	acdev->vbase = devm_ioremap_nocache(&pdev->dev, res->start,
 			resource_size(res));
 	if (!acdev->vbase) {
 		dev_warn(&pdev->dev, "ioremap fail\n");
@@ -937,8 +935,7 @@ static int arasan_cf_suspend(struct device *dev)
 		dmaengine_terminate_all(acdev->dma_chan);
 
 	cf_exit(acdev);
-	ata_host_suspend(host, PMSG_SUSPEND);
-	return 0;
+	return ata_host_suspend(host, PMSG_SUSPEND);
 }
 
 static int arasan_cf_resume(struct device *dev)
