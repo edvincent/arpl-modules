@@ -823,7 +823,7 @@ static bool piix_irq_check(struct ata_port *ap)
 		return false;
 
 	host_stat = ap->ops->bmdma_status(ap);
-	ata_bmdma_status(ap, host_stat);
+	ata_bmdma_status(ap);
 
 	return host_stat & ATA_DMA_INTR;
 }
