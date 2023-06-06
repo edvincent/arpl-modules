@@ -823,7 +823,7 @@ static bool piix_irq_check(struct ata_port *ap)
 		return false;
 
 	host_stat = ap->ops->bmdma_status(ap);
-	trace_ata_bmdma_status(ap, host_stat);
+	ata_bmdma_status(ap, host_stat);
 
 	return host_stat & ATA_DMA_INTR;
 }
@@ -844,12 +844,6 @@ static int piix_broken_suspend(void)
 			.matches = {
 				DMI_MATCH(DMI_SYS_VENDOR, "TOSHIBA"),
 				DMI_MATCH(DMI_PRODUCT_NAME, "Tecra M3"),
-			},
-		},
-		{
-			.ident = "TECRA M3",
-			.matches = {
-				DMI_MATCH(DMI_OEM_STRING, "Tecra M3,"),
 			},
 		},
 		{
