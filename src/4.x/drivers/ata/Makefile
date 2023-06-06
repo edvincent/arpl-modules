@@ -1,5 +1,5 @@
 
-obj-m	+= libata.o
+obj-y	+= libata.o
 
 # non-SFF interface
 obj-y	+= ahci.o libahci.o
