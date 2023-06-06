@@ -29,12 +29,12 @@ obj-y	+= sata_qstor.o
 obj-y	+= sata_sx4.o
 
 # SFF SATA w/ BMDMA
-obj-y	+= ata_piix.o
+obj-m	+= ata_piix.o
 obj-y	+= sata_mv.o
-obj-y	+= sata_nv.o
+obj-m	+= sata_nv.o
 obj-y	+= sata_promise.o
 obj-y	+= sata_rcar.o
-obj-y	+= sata_sil.o
+obj-m	+= sata_sil.o
 obj-y	+= sata_sis.o
 obj-y	+= sata_svw.o
 obj-y	+= sata_uli.o
