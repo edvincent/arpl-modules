@@ -8,7 +8,7 @@
 /* File hw_atl_fw_image.c
  */
 #include <linux/firmware.h>
-#include <linux/crc-itu-t.h>
+#include "../crc-itu-t.h"
 
 #include "../aq_hw_utils.h"
 #include "../aq_hw.h"
