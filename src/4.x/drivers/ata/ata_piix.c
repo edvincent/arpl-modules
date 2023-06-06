@@ -1088,12 +1088,12 @@ static struct attribute *piix_sidpr_shost_attrs[] = {
 };
 
 ATTRIBUTE_GROUPS(piix_sidpr_shost);
-
+/*
 static struct scsi_host_template piix_sidpr_sht = {
 	ATA_BMDMA_SHT(DRV_NAME),
 	.shost_groups		= piix_sidpr_shost_groups,
 };
-
+*/
 static struct ata_port_operations piix_sidpr_sata_ops = {
 	.inherits		= &piix_sata_ops,
 	.hardreset		= sata_std_hardreset,
