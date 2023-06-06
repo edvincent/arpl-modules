@@ -1706,8 +1706,10 @@ static int piix_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 		rc = piix_init_sidpr(host);
 		if (rc)
 			return rc;
+		/*
 		if (host->ports[0]->ops == &piix_sidpr_sata_ops)
 			sht = &piix_sidpr_sht;
+		*/	
 	}
 
 	/* apply IOCFG bit18 quirk */
