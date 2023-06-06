@@ -1438,7 +1438,11 @@ static struct phy_driver genphy_driver[] = {
 	.phy_id		= 0xffffffff,
 	.phy_id_mask	= 0xffffffff,
 	.name		= "Generic PHY",
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 14, 80)
+	.soft_reset	= genphy_soft_reset,
+#else
 	.soft_reset	= genphy_no_soft_reset,
+#endif
 	.config_init	= genphy_config_init,
 	.features	= PHY_GBIT_FEATURES | SUPPORTED_MII |
 			  SUPPORTED_AUI | SUPPORTED_FIBRE |
