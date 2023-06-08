@@ -20,10 +20,12 @@ jobs:
           ls -d *-*/ | grep -v -e "arpl-modules/"
           for D in `ls -d *-*/`; do
             E=$(echo ${D} | sed 's#/##')
-            echo "clean ${E} directory"
-            rm -f ./${E}/*
-            echo "extract ${E} wjz304's module pack"
-            tar -xaf /tmp/${E}.tgz -C ./${E}/
+            if [ ${E} == "epyc7002-5.10.55" ]; then
+              echo "clean ${E} directory"
+              rm -f ./${E}/*
+              echo "extract ${E} wjz304's module pack"
+              tar -xaf /tmp/${E}.tgz -C ./${E}/
+            fi
             echo "copy ${E} vanilla module"
             [ -d ./vanilla/${E} ] && cp -vf ./vanilla/${E}/*.ko ./${E}/
             (cd ${E} && tar caf ../${E}.tgz *.ko)
