@@ -47,7 +47,7 @@ obj-$(CONFIG_VIRTIO)		+= virtio/
 
 # tty/ comes before char/ so that the VT console is the boot-time
 # default.
-#obj-y				+= tty/
+obj-y				+= tty/
 #obj-y				+= char/
 
 # iommu/ comes before gpu as gpu are using iommu controllers
