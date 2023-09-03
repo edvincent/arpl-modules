@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-2.0
 # Makefile for Linux PHY drivers
 
-#libphy-y			:= phy.o phy-c45.o phy-core.o phy_device.o \
+libphy-y			:= phy.o phy-c45.o phy-core.o phy_device.o \
 				   linkmode.o
 mdio-bus-y			+= mdio_bus.o mdio_device.o
 
@@ -17,12 +17,12 @@ libphy-y			+= $(mdio-bus-y)
 else
 obj-$(CONFIG_MDIO_DEVICE)	+= mdio-bus.o
 endif
-#obj-$(CONFIG_MDIO_DEVRES)	+= mdio_devres.o
+obj-$(CONFIG_MDIO_DEVRES)	+= mdio_devres.o
 libphy-$(CONFIG_SWPHY)		+= swphy.o
 libphy-$(CONFIG_LED_TRIGGER_PHY)	+= phy_led_triggers.o
 
-#obj-$(CONFIG_PHYLINK)		+= phylink.o
-#obj-$(CONFIG_PHYLIB)		+= libphy.o
+obj-$(CONFIG_PHYLINK)		+= phylink.o
+obj-$(CONFIG_PHYLIB)		+= libphy.o
 
 #obj-$(CONFIG_NETWORK_PHY_TIMESTAMPING) += mii_timestamper.o
 
@@ -56,7 +56,7 @@ libphy-$(CONFIG_LED_TRIGGER_PHY)	+= phy_led_triggers.o
 #obj-$(CONFIG_DP83867_PHY)	+= dp83867.o
 #obj-$(CONFIG_DP83869_PHY)	+= dp83869.o
 #obj-$(CONFIG_DP83TC811_PHY)	+= dp83tc811.o
-#obj-$(CONFIG_FIXED_PHY)		+= fixed_phy.o
+obj-$(CONFIG_FIXED_PHY)		+= fixed_phy.o
 #obj-$(CONFIG_ICPLUS_PHY)	+= icplus.o
 #obj-$(CONFIG_INTEL_XWAY_PHY)	+= intel-xway.o
 #obj-$(CONFIG_LSI_ET1011C_PHY)	+= et1011c.o
@@ -72,7 +72,7 @@ libphy-$(CONFIG_LED_TRIGGER_PHY)	+= phy_led_triggers.o
 #obj-$(CONFIG_NATIONAL_PHY)	+= national.o
 #obj-$(CONFIG_NXP_TJA11XX_PHY)	+= nxp-tja11xx.o
 #obj-$(CONFIG_QSEMI_PHY)		+= qsemi.o
-#obj-$(CONFIG_REALTEK_PHY)	+= realtek.o
+obj-$(CONFIG_REALTEK_PHY)	+= realtek.o
 #obj-$(CONFIG_RENESAS_PHY)	+= uPD60620.o
 #obj-$(CONFIG_ROCKCHIP_PHY)	+= rockchip.o
 #obj-$(CONFIG_SMSC_PHY)		+= smsc.o

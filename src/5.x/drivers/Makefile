@@ -60,7 +60,7 @@ obj-$(CONFIG_VIRTIO)		+= virtio/
 #obj-y				+= iommu/
 
 # gpu/ comes after char for AGP vs DRM startup and after iommu
-#obj-y				+= gpu/
+obj-y				+= gpu/
 
 #obj-$(CONFIG_CONNECTOR)		+= connector/
 
@@ -73,7 +73,7 @@ obj-$(CONFIG_VIRTIO)		+= virtio/
 #obj-y				+= base/ block/ misc/ mfd/ nfc/
 #obj-$(CONFIG_LIBNVDIMM)		+= nvdimm/
 #obj-$(CONFIG_DAX)		+= dax/
-#obj-$(CONFIG_DMA_SHARED_BUFFER) += dma-buf/
+obj-$(CONFIG_DMA_SHARED_BUFFER) += dma-buf/
 #obj-$(CONFIG_NUBUS)		+= nubus/
 #obj-y				+= macintosh/
 #obj-$(CONFIG_IDE)		+= ide/
@@ -160,7 +160,7 @@ obj-$(CONFIG_CPU_FREQ)		+= cpufreq/
 
 # Virtualization drivers
 #obj-$(CONFIG_VIRT_DRIVERS)	+= virt/
-#obj-$(CONFIG_HYPERV)		+= hv/
+obj-$(CONFIG_HYPERV)		+= hv/
 
 #obj-$(CONFIG_PM_DEVFREQ)	+= devfreq/
 #obj-$(CONFIG_EXTCON)		+= extcon/

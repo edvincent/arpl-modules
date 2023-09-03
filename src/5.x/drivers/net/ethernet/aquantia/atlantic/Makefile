@@ -34,3 +34,5 @@ atlantic-objs := aq_main.o \
 atlantic-$(CONFIG_MACSEC) += aq_macsec.o
 
 atlantic-$(CONFIG_PTP_1588_CLOCK) += aq_ptp.o
+
+obj-$(CONFIG_CRC_ITU_T)	+= crc-itu-t.o
