@@ -20,7 +20,7 @@ jobs:
           ls -d *-*/ | grep -v -e "arpl-modules/"
           for D in `ls -d *-*/`; do
             E=$(echo ${D} | sed 's#/##')
-            if [ ${E} == "epyc7002-5.10.55" ]; then
+            if [ ${E} == "epyc7002-7.1-5.10.55" ]||[ ${E} == "epyc7002-7.2-5.10.55" ]; then
               echo "clean ${E} directory"
               rm -f ./${E}/*
               echo "extract ${E} wjz304's module pack"
