@@ -176,7 +176,7 @@ scsi_mod-$(CONFIG_SCSI_DH)	+= scsi_dh.o
 #hv_storvsc-y			:= storvsc_drv.o
 
 sd_mod-objs	:= sd.o
-sd_mod-$(CONFIG_BLK_DEV_INTEGRITY) += sd_dif.o
+sd_mod-y += sd_dif.o
 
 sr_mod-objs	:= sr.o sr_ioctl.o sr_vendor.o
 #ncr53c8xx-flags-$(CONFIG_SCSI_ZALON) \
