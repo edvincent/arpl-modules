@@ -1,21 +1,7 @@
-/*
- * linux/drivers/scsi/scsi_proc.c
- *
- * The functions in this file provide an interface between
- * the PROC file system and the SCSI device drivers
- * It is mainly used for debugging, statistics and to pass 
- * information directly to the lowlevel driver.
- *
- * (c) 1995 Michael Neuffer neuffer@goofy.zdv.uni-mainz.de 
- * Version: 0.99.8   last change: 95/09/13
- * 
- * generic command parser provided by: 
- * Andreas Heilwagen <crashcar@informatik.uni-koblenz.de>
- *
- * generic_proc_info() support of xxxx_info() by:
- * Michael A. Griffith <grif@acm.org>
- */
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/module.h>
 #include <linux/init.h>
 #include <linux/string.h>
@@ -36,13 +22,39 @@
 #include "scsi_priv.h"
 #include "scsi_logging.h"
 
-
-/* 4K page size, but our output routines, use some slack for overruns */
 #define PROC_BLOCK_SIZE (3*1024)
+
+#ifdef MY_DEF_HERE
+#define DISK_READY_MAX_WAIT_MSEC 120000  
+#define SZ_SYNO_PROC_DISK_READY "syno_disk_ready_check"
+
+atomic_t syno_disk_not_ready_count = ATOMIC_INIT(0);
+atomic_long_t syno_drive_start_time = ATOMIC_LONG_INIT(0);
+#endif  
 
 static struct proc_dir_entry *proc_scsi;
 
-/* Protect sht->present and sht->proc_dir */
+#ifdef MY_DEF_HERE
+static void syno_disk_not_ready_count_increase(void)
+{
+	atomic_inc(&syno_disk_not_ready_count);
+}
+EXPORT_SYMBOL(syno_disk_not_ready_count_increase);
+
+static void syno_disk_not_ready_count_decrease(void)
+{
+	 
+	WARN_ON_ONCE(!atomic_add_unless(&syno_disk_not_ready_count, -1, 0));
+}
+EXPORT_SYMBOL(syno_disk_not_ready_count_decrease);
+
+static void syno_disk_start_time_set(void)
+{
+	atomic_long_set(&syno_drive_start_time, jiffies);
+}
+EXPORT_SYMBOL(syno_disk_start_time_set);
+#endif  
+
 static DEFINE_MUTEX(global_host_template_mutex);
 
 static ssize_t proc_scsi_host_write(struct file *file, const char __user *buf,
@@ -90,12 +102,43 @@ static const struct file_operations proc_scsi_fops = {
 	.write = proc_scsi_host_write
 };
 
-/**
- * scsi_proc_hostdir_add - Create directory in /proc for a scsi host
- * @sht: owner of this directory
- *
- * Sets sht->proc_dir to the new directory.
- */
+#ifdef MY_DEF_HERE
+
+static int syno_scsi_disk_ready_check(void)
+{
+	int ret = 0;
+	if (0 == atomic_read(&syno_disk_not_ready_count)) {
+		ret = 1;
+	} else {
+		if (time_before(jiffies,
+					(atomic_long_read(&syno_drive_start_time)) +
+					 msecs_to_jiffies(DISK_READY_MAX_WAIT_MSEC))) {
+			ret = 0;
+		} else {
+			ret = 1;
+		}
+	}
+	return ret;
+}
+
+static int syno_scsi_proc_disk_ready_show(struct seq_file *m, void *v)
+{
+	seq_printf(m, "%d\n", syno_scsi_disk_ready_check());
+	return 0;
+}
+
+static int syno_scsi_proc_disk_ready_open(struct inode *inode, struct file *file)
+{
+	return single_open(file, syno_scsi_proc_disk_ready_show, NULL);
+}
+
+static const struct file_operations syno_scsi_proc_disk_ready_fops = {
+	.open = syno_scsi_proc_disk_ready_open,
+	.release = single_release,
+	.read = seq_read,
+	.llseek = seq_lseek,
+};
+#endif  
 
 void scsi_proc_hostdir_add(struct scsi_host_template *sht)
 {
@@ -112,10 +155,6 @@ void scsi_proc_hostdir_add(struct scsi_host_template *sht)
 	mutex_unlock(&global_host_template_mutex);
 }
 
-/**
- * scsi_proc_hostdir_rm - remove directory in /proc for a scsi host
- * @sht: owner of directory
- */
 void scsi_proc_hostdir_rm(struct scsi_host_template *sht)
 {
 	if (!sht->show_info)
@@ -129,11 +168,6 @@ void scsi_proc_hostdir_rm(struct scsi_host_template *sht)
 	mutex_unlock(&global_host_template_mutex);
 }
 
-
-/**
- * scsi_proc_host_add - Add entry for this host to appropriate /proc dir
- * @shost: host to add
- */
 void scsi_proc_host_add(struct Scsi_Host *shost)
 {
 	struct scsi_host_template *sht = shost->hostt;
@@ -152,10 +186,6 @@ void scsi_proc_host_add(struct Scsi_Host *shost)
 		       sht->proc_name);
 }
 
-/**
- * scsi_proc_host_rm - remove this host's entry from /proc
- * @shost: which host
- */
 void scsi_proc_host_rm(struct Scsi_Host *shost)
 {
 	char name[10];
@@ -166,14 +196,7 @@ void scsi_proc_host_rm(struct Scsi_Host *shost)
 	sprintf(name,"%d", shost->host_no);
 	remove_proc_entry(name, shost->hostt->proc_dir);
 }
-/**
- * proc_print_scsidevice - return data about this host
- * @dev: A scsi device
- * @data: &struct seq_file to output to.
- *
- * Description: prints Host, Channel, Id, Lun, Vendor, Model, Rev, Type,
- * and revision.
- */
+ 
 static int proc_print_scsidevice(struct device *dev, void *data)
 {
 	struct scsi_device *sdev;
@@ -195,7 +218,11 @@ static int proc_print_scsidevice(struct device *dev, void *data)
 	}
 
 	seq_puts(s, " Model: ");
+#ifdef MY_ABC_HERE
+	for (i = 0; i < CONFIG_SYNO_DISK_MODEL_NUM; i++) {
+#else  
 	for (i = 0; i < 16; i++) {
+#endif  
 		if (sdev->model[i] >= 0x20)
 			seq_putc(s, sdev->model[i]);
 		else
@@ -224,21 +251,6 @@ out:
 	return 0;
 }
 
-/**
- * scsi_add_single_device - Respond to user request to probe for/add device
- * @host: user-supplied decimal integer
- * @channel: user-supplied decimal integer
- * @id: user-supplied decimal integer
- * @lun: user-supplied decimal integer
- *
- * Description: called by writing "scsi add-single-device" to /proc/scsi/scsi.
- *
- * does scsi_host_lookup() and either user_scan() if that transport
- * type supports it, or else scsi_scan_host_selected()
- *
- * Note: this seems to be aimed exclusively at SCSI parallel busses.
- */
-
 static int scsi_add_single_device(uint host, uint channel, uint id, uint lun)
 {
 	struct Scsi_Host *shost;
@@ -256,16 +268,6 @@ static int scsi_add_single_device(uint host, uint channel, uint id, uint lun)
 	return error;
 }
 
-/**
- * scsi_remove_single_device - Respond to user request to remove a device
- * @host: user-supplied decimal integer
- * @channel: user-supplied decimal integer
- * @id: user-supplied decimal integer
- * @lun: user-supplied decimal integer
- *
- * Description: called by writing "scsi remove-single-device" to
- * /proc/scsi/scsi.  Does a scsi_device_lookup() and scsi_remove_device()
- */
 static int scsi_remove_single_device(uint host, uint channel, uint id, uint lun)
 {
 	struct scsi_device *sdev;
@@ -285,25 +287,6 @@ static int scsi_remove_single_device(uint host, uint channel, uint id, uint lun)
 	scsi_host_put(shost);
 	return error;
 }
-
-/**
- * proc_scsi_write - handle writes to /proc/scsi/scsi
- * @file: not used
- * @buf: buffer to write
- * @length: length of buf, at most PAGE_SIZE
- * @ppos: not used
- *
- * Description: this provides a legacy mechanism to add or remove devices by
- * Host, Channel, ID, and Lun.  To use,
- * "echo 'scsi add-single-device 0 1 2 3' > /proc/scsi/scsi" or
- * "echo 'scsi remove-single-device 0 1 2 3' > /proc/scsi/scsi" with
- * "0 1 2 3" replaced by the Host, Channel, Id, and Lun.
- *
- * Note: this seems to be aimed at parallel SCSI. Most modern busses (USB,
- * SATA, Firewire, Fibre Channel, etc) dynamically assign these values to
- * provide a unique identifier and nothing more.
- */
-
 
 static ssize_t proc_scsi_write(struct file *file, const char __user *buf,
 			       size_t length, loff_t *ppos)
@@ -329,10 +312,6 @@ static ssize_t proc_scsi_write(struct file *file, const char __user *buf,
 	else if (buffer[PAGE_SIZE-1])
 		goto out;
 
-	/*
-	 * Usage: echo "scsi add-single-device 0 1 2 3" >/proc/scsi/scsi
-	 * with  "0 1 2 3" replaced by your "Host Channel Id Lun".
-	 */
 	if (!strncmp("scsi add-single-device", buffer, 22)) {
 		p = buffer + 23;
 
@@ -343,10 +322,6 @@ static ssize_t proc_scsi_write(struct file *file, const char __user *buf,
 
 		err = scsi_add_single_device(host, channel, id, lun);
 
-	/*
-	 * Usage: echo "scsi remove-single-device 0 1 2 3" >/proc/scsi/scsi
-	 * with  "0 1 2 3" replaced by your "Host Channel Id Lun".
-	 */
 	} else if (!strncmp("scsi remove-single-device", buffer, 25)) {
 		p = buffer + 26;
 
@@ -358,10 +333,6 @@ static ssize_t proc_scsi_write(struct file *file, const char __user *buf,
 		err = scsi_remove_single_device(host, channel, id, lun);
 	}
 
-	/*
-	 * convert success returns so that we return the 
-	 * number of bytes consumed.
-	 */
 	if (!err)
 		err = length;
 
@@ -423,19 +394,9 @@ static const struct seq_operations scsi_seq_ops = {
 	.show	= scsi_seq_show
 };
 
-/**
- * proc_scsi_open - glue function
- * @inode: not used
- * @file: passed to single_open()
- *
- * Associates proc_scsi_show with this file
- */
 static int proc_scsi_open(struct inode *inode, struct file *file)
 {
-	/*
-	 * We don't really need this for the write case but it doesn't
-	 * harm either.
-	 */
+	 
 	return seq_open(file, &scsi_seq_ops);
 }
 
@@ -448,9 +409,6 @@ static const struct file_operations proc_scsi_operations = {
 	.release	= seq_release,
 };
 
-/**
- * scsi_init_procfs - create scsi and scsi/scsi in procfs
- */
 int __init scsi_init_procfs(void)
 {
 	struct proc_dir_entry *pde;
@@ -463,19 +421,34 @@ int __init scsi_init_procfs(void)
 	if (!pde)
 		goto err2;
 
-	return 0;
+#ifdef MY_DEF_HERE
+	 
+	atomic_long_set(&syno_drive_start_time, jiffies);
+	if (!proc_create_data(SZ_SYNO_PROC_DISK_READY,
+					S_IRUGO, proc_scsi,
+					&syno_scsi_proc_disk_ready_fops, NULL)) {
+		printk("%s: Failed to register %s\n", __func__,
+					 "scsi/"SZ_SYNO_PROC_DISK_READY);
+		goto err3;
+	}
+#endif  
 
+	return 0;
+#ifdef MY_DEF_HERE
+err3:
+	remove_proc_entry("scsi/scsi", NULL);
+#endif  
 err2:
 	remove_proc_entry("scsi", NULL);
 err1:
 	return -ENOMEM;
 }
 
-/**
- * scsi_exit_procfs - Remove scsi/scsi and scsi from procfs
- */
 void scsi_exit_procfs(void)
 {
 	remove_proc_entry("scsi/scsi", NULL);
+#ifdef MY_DEF_HERE
+	remove_proc_entry(SZ_SYNO_PROC_DISK_READY, proc_scsi);
+#endif  
 	remove_proc_entry("scsi", NULL);
 }

@@ -1,11 +1,7 @@
-/*
- * scsi_sysfs.c
- *
- * SCSI sysfs interface routines.
- *
- * Created to pull SCSI mid layer sysfs routines into one file.
- */
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/module.h>
 #include <linux/slab.h>
 #include <linux/init.h>
@@ -87,9 +83,7 @@ static int check_set(unsigned long long *val, char *src)
 	if (strncmp(src, "-", 20) == 0) {
 		*val = SCAN_WILD_CARD;
 	} else {
-		/*
-		 * Doesn't check for int overflow
-		 */
+		 
 		*val = simple_strtoull(src, &last, 0);
 		if (*last != '\0')
 			return 1;
@@ -119,10 +113,6 @@ static int scsi_scan(struct Scsi_Host *shost, const char *str)
 	return res;
 }
 
-/*
- * shost_show_function: macro to create an attr function that can be used to
- * show a non-bit field.
- */
 #define shost_show_function(name, field, format_string)			\
 static ssize_t								\
 show_##name (struct device *dev, struct device_attribute *attr, 	\
@@ -132,20 +122,12 @@ show_##name (struct device *dev, struct device_attribute *attr, 	\
 	return snprintf (buf, 20, format_string, shost->field);		\
 }
 
-/*
- * shost_rd_attr: macro to create a function and attribute variable for a
- * read only field.
- */
 #define shost_rd_attr2(name, field, format_string)			\
 	shost_show_function(name, field, format_string)			\
 static DEVICE_ATTR(name, S_IRUGO, show_##name, NULL);
 
 #define shost_rd_attr(field, format_string) \
 shost_rd_attr2(field, field, format_string)
-
-/*
- * Create the actual show/store functions and data structures.
- */
 
 static ssize_t
 store_scan(struct device *dev, struct device_attribute *attr,
@@ -197,7 +179,6 @@ show_shost_state(struct device *dev, struct device_attribute *attr, char *buf)
 	return snprintf(buf, 20, "%s\n", name);
 }
 
-/* DEVICE_ATTR(state) clashes with dev_attr_state for sdev */
 struct device_attribute dev_attr_hstate =
 	__ATTR(state, S_IRUGO | S_IWUSR, show_shost_state, store_shost_state);
 
@@ -225,7 +206,7 @@ show_shost_supported_mode(struct device *dev, struct device_attribute *attr,
 	unsigned int supported_mode = shost->hostt->supported_mode;
 
 	if (supported_mode == MODE_UNKNOWN)
-		/* by default this should be initiator */
+		 
 		supported_mode = MODE_INITIATOR;
 
 	return show_shost_mode(supported_mode, buf);
@@ -420,12 +401,15 @@ static void scsi_device_dev_release_usercontext(struct work_struct *work)
 	}
 
 	blk_put_queue(sdev->request_queue);
-	/* NULL queue means the device can't be used */
+	 
 	sdev->request_queue = NULL;
 
 	kfree(sdev->vpd_pg83);
 	kfree(sdev->vpd_pg80);
 	kfree(sdev->inquiry);
+#ifdef MY_ABC_HERE
+	kfree(sdev->model);
+#endif  
 	kfree(sdev);
 
 	if (parent)
@@ -444,7 +428,6 @@ static struct class sdev_class = {
 	.dev_release	= scsi_device_cls_release,
 };
 
-/* all probing is done in the individual ->probe routines */
 static int scsi_bus_match(struct device *dev, struct device_driver *gendrv)
 {
 	struct scsi_device *sdp;
@@ -501,10 +484,18 @@ void scsi_sysfs_unregister(void)
 	bus_unregister(&scsi_bus_type);
 }
 
-/*
- * sdev_show_function: macro to create an attr function that can be used to
- * show a non-bit field.
- */
+#ifdef MY_ABC_HERE
+#define sdev_show_function(field, format_string)				\
+static ssize_t								\
+sdev_show_##field (struct device *dev, struct device_attribute *attr,	\
+		   char *buf)						\
+{									\
+	struct scsi_device *sdev;					\
+	sdev = to_scsi_device(dev);					\
+	return snprintf (buf, CONFIG_SYNO_DISK_MODEL_NUM + 4, format_string, sdev->field);		\
+}									\
+
+#else  
 #define sdev_show_function(field, format_string)				\
 static ssize_t								\
 sdev_show_##field (struct device *dev, struct device_attribute *attr,	\
@@ -515,19 +506,12 @@ sdev_show_##field (struct device *dev, struct device_attribute *attr,	\
 	return snprintf (buf, 20, format_string, sdev->field);		\
 }									\
 
-/*
- * sdev_rd_attr: macro to create a function and attribute variable for a
- * read only field.
- */
+#endif  
+
 #define sdev_rd_attr(field, format_string)				\
 	sdev_show_function(field, format_string)			\
 static DEVICE_ATTR(field, S_IRUGO, sdev_show_##field, NULL);
 
-
-/*
- * sdev_rw_attr: create a function and attribute variable for a
- * read/write field.
- */
 #define sdev_rw_attr(field, format_string)				\
 	sdev_show_function(field, format_string)				\
 									\
@@ -542,13 +526,8 @@ sdev_store_##field (struct device *dev, struct device_attribute *attr,	\
 }									\
 static DEVICE_ATTR(field, S_IRUGO | S_IWUSR, sdev_show_##field, sdev_store_##field);
 
-/* Currently we don't export bit fields, but we might in future,
- * so leave this code in */
 #if 0
-/*
- * sdev_rd_attr: create a function and attribute variable for a
- * read/write bit field.
- */
+ 
 #define sdev_rw_attr_bit(field)						\
 	sdev_show_function(field, "%d\n")					\
 									\
@@ -568,10 +547,6 @@ sdev_store_##field (struct device *dev, struct device_attribute *attr,	\
 }									\
 static DEVICE_ATTR(field, S_IRUGO | S_IWUSR, sdev_show_##field, sdev_store_##field);
 
-/*
- * scsi_sdev_check_buf_bit: return 0 if buf is "0", return 1 if buf is "1",
- * else return -EINVAL.
- */
 static int scsi_sdev_check_buf_bit(const char *buf)
 {
 	if ((buf[1] == '\0') || ((buf[1] == '\n') && (buf[2] == '\0'))) {
@@ -585,13 +560,248 @@ static int scsi_sdev_check_buf_bit(const char *buf)
 		return -EINVAL;
 }
 #endif
-/*
- * Create the actual show/store functions and data structures.
- */
+
+#ifdef MY_ABC_HERE
+extern void
+ScsiRemapModeSet(struct scsi_device *sdev, unsigned char blAutoRemap);
+static ssize_t
+sdev_show_auto_remap(struct device *dev, struct device_attribute *attr, char *buf)
+{
+	struct scsi_device *sdev;
+	sdev = to_scsi_device(dev);
+	return snprintf (buf, 20, "%d type 0x%x\n", sdev->auto_remap, sdev->type);
+}
+
+static ssize_t
+sdev_store_auto_remap(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+	struct scsi_device *sdev;
+	int val = 0;
+	sdev = to_scsi_device(dev);
+	sscanf (buf, "%d", &val);
+
+	ScsiRemapModeSet(sdev, val ? 1 : 0);
+	return count;
+}
+static DEVICE_ATTR(auto_remap, S_IRUGO | S_IWUSR, sdev_show_auto_remap, sdev_store_auto_remap);
+#endif  
+
+#ifdef MY_ABC_HERE
+static ssize_t
+syno_disk_serial_show(struct device *device, struct device_attribute *attr, char *buf)
+{
+	struct scsi_device *sdev = NULL;
+	ssize_t len = -EFAULT;
+
+	if (NULL == (sdev = to_scsi_device(device))) {
+		goto END;
+	}
+
+	len = snprintf(buf, SERIAL_NUM_SIZE + 2, "%s\n", sdev->syno_disk_serial);
+END:
+	return len;
+}
+static DEVICE_ATTR(syno_disk_serial, S_IRUGO, syno_disk_serial_show, NULL);
+#endif  
+
+#ifdef MY_ABC_HERE
+ 
+static ssize_t
+sdev_show_syno_idle_time(struct device *dev, struct device_attribute *attr, char *buf)
+{
+	struct scsi_device *sdev;
+	int iRet = -EFAULT;
+
+	if (NULL == (sdev = to_scsi_device(dev))) {
+		goto END;
+	}
+
+	iRet = snprintf(buf, 20, "%lu\n", (jiffies - sdev->idle) / HZ + 1);
+
+END:
+	return iRet;
+}
+
+static ssize_t
+sdev_store_syno_idle_time(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+	struct scsi_device *sdev;
+	unsigned long idletime;
+
+	if (NULL == (sdev = to_scsi_device(dev))) {
+		goto END;
+	}
+
+	sscanf(buf, "%lu", &idletime);
+	 
+	sdev->idle = jiffies - (idletime - 1) * HZ;
+
+END:
+	return count;
+}
+
+static DEVICE_ATTR(syno_idle_time, S_IRUGO | S_IWUSR, sdev_show_syno_idle_time, sdev_store_syno_idle_time);
+
+static ssize_t
+sdev_show_syno_spindown(struct device *dev, struct device_attribute *attr, char *buf)
+{
+	struct scsi_device *sdev;
+	int iRet = -EFAULT;
+
+	if (NULL == (sdev = to_scsi_device(dev))) {
+		goto END;
+	}
+
+	iRet = snprintf(buf, 20, "%d\n", sdev->spindown);
+
+END:
+	return iRet;
+}
+
+static DEVICE_ATTR(syno_spindown, S_IRUGO, sdev_show_syno_spindown, NULL);
+
+static ssize_t
+sdev_show_syno_standby_syncing(struct device *dev, struct device_attribute *attr, char *buf)
+{
+	struct scsi_device *sdev;
+	int iRet = -EFAULT;
+
+	if (NULL == (sdev = to_scsi_device(dev))) {
+		goto END;
+	}
+
+	iRet = snprintf (buf, 20, "%u\n", sdev->do_standby_syncing);
+
+END:
+	return iRet;
+}
+
+static ssize_t
+sdev_store_syno_standby_syncing(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+	struct scsi_device *sdev;
+	unsigned long ulstandby_syncing;
+
+	if (NULL == (sdev = to_scsi_device(dev))) {
+		goto END;
+	}
+
+	sscanf(buf, "%lu", &ulstandby_syncing);
+	if (0 < ulstandby_syncing) {
+		sdev->do_standby_syncing = 1;
+	} else {
+		sdev->do_standby_syncing = 0;
+	}
+
+END:
+	return count;
+}
+
+static DEVICE_ATTR(syno_standby_syncing, S_IRUGO | S_IWUSR, sdev_show_syno_standby_syncing, sdev_store_syno_standby_syncing);
+#endif  
+
+#ifdef MY_DEF_HERE
+const char *disk_spd_string(unsigned char spd)
+{
+        char *szRet;
+        static const char * const spd_str[] = {
+                "unknown",
+                "1.5 Gbps",
+                "3.0 Gbps",
+                "6.0 Gbps",
+                "12.0 Gbps"
+        };
+
+        if (spd > (ARRAY_SIZE(spd_str) - 1)){
+                szRet = spd_str[0];
+        }else{
+                szRet = spd_str[spd];
+        }
+
+        return szRet;
+}
+
+static ssize_t
+sdev_show_syno_disk_spd(struct device *dev, struct device_attribute *attr, char *buf)
+{
+                struct scsi_device *sdev = to_scsi_device(dev);
+                int iRet = -EFAULT;
+                int iDiskSpd = NULL;
+
+                if (NULL == (sdev = to_scsi_device(dev))){
+                        goto END;
+                }
+
+                if (NULL == sdev->host->hostt->syno_get_disk_speed){
+                        goto END;
+                }else {
+                         
+                        iDiskSpd = sdev->host->hostt->syno_get_disk_speed(sdev->host, sdev->id);
+                        iRet = snprintf (buf, 20, "%s\n", disk_spd_string(iDiskSpd));
+                }
+END:
+                return iRet;
+}
+
+static DEVICE_ATTR(syno_disk_spd, S_IRUGO, sdev_show_syno_disk_spd, NULL);
+#endif  
+
+#ifdef MY_ABC_HERE
+ 
+static ssize_t
+syno_scmd_min_timeout_show (struct device *dev, struct device_attribute *attr, char *buf)
+{
+	struct scsi_device *sdev = to_scsi_device(dev);
+	ssize_t len = -EIO;
+
+	if (!sdev) {
+		goto END;
+	}
+
+	if (0 == sdev->scmd_timeout_sec) {
+		len = sprintf(buf, "%s", "<not set>\n");
+	} else {
+		len = sprintf(buf, "%d%s", sdev->scmd_timeout_sec, "\n");
+	}
+
+END:
+	return len;
+}
+
+static ssize_t
+syno_scmd_min_timeout_store(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+	struct scsi_device *sdev = to_scsi_device(dev);
+	int iTimeoutSec = 0;
+	ssize_t ret = -EIO;
+
+	if (!sdev) {
+		goto END;
+	}
+
+	sscanf(buf, "%d", &iTimeoutSec);
+	if (0 >= iTimeoutSec || 60 < iTimeoutSec) {
+		printk(KERN_ERR "Invalid argument !!\n");
+		goto END;
+	}
+	sdev->scmd_timeout_sec = iTimeoutSec;
+
+	ret = count;
+
+END:
+	return ret;
+}
+DEVICE_ATTR(syno_scmd_min_timeout, S_IRUGO | S_IWUSR, syno_scmd_min_timeout_show, syno_scmd_min_timeout_store);
+#endif  
+
 sdev_rd_attr (type, "%d\n");
 sdev_rd_attr (scsi_level, "%d\n");
 sdev_rd_attr (vendor, "%.8s\n");
+#ifdef MY_ABC_HERE
+sdev_rd_attr (model, "%."CONFIG_SYNO_DISK_MODEL_LEN"s\n");
+#else  
 sdev_rd_attr (model, "%.16s\n");
+#endif  
 sdev_rd_attr (rev, "%.4s\n");
 
 static ssize_t
@@ -612,9 +822,6 @@ sdev_show_device_blocked(struct device *dev, struct device_attribute *attr,
 }
 static DEVICE_ATTR(device_blocked, S_IRUGO, sdev_show_device_blocked, NULL);
 
-/*
- * TODO: can we make these symlinks to the block layer ones?
- */
 static ssize_t
 sdev_show_timeout (struct device *dev, struct device_attribute *attr, char *buf)
 {
@@ -678,24 +885,8 @@ static ssize_t
 sdev_store_delete(struct device *dev, struct device_attribute *attr,
 		  const char *buf, size_t count)
 {
-	struct kernfs_node *kn;
-
-	kn = sysfs_break_active_protection(&dev->kobj, &attr->attr);
-	WARN_ON_ONCE(!kn);
-	/*
-	 * Concurrent writes into the "delete" sysfs attribute may trigger
-	 * concurrent calls to device_remove_file() and scsi_remove_device().
-	 * device_remove_file() handles concurrent removal calls by
-	 * serializing these and by ignoring the second and later removal
-	 * attempts.  Concurrent calls of scsi_remove_device() are
-	 * serialized. The second and later calls of scsi_remove_device() are
-	 * ignored because the first call of that function changes the device
-	 * state into SDEV_DEL.
-	 */
-	device_remove_file(dev, attr);
-	scsi_remove_device(to_scsi_device(dev));
-	if (kn)
-		sysfs_unbreak_active_protection(kn);
+	if (device_remove_file_self(dev, attr))
+		scsi_remove_device(to_scsi_device(dev));
 	return count;
 };
 static DEVICE_ATTR(delete, S_IWUSR, NULL, sdev_store_delete);
@@ -952,7 +1143,6 @@ static umode_t scsi_sdev_attr_is_visible(struct kobject *kobj,
 	struct device *dev = container_of(kobj, struct device, kobj);
 	struct scsi_device *sdev = to_scsi_device(dev);
 
-
 	if (attr == &dev_attr_queue_depth.attr &&
 	    !sdev->host->hostt->change_queue_depth)
 		return S_IRUGO;
@@ -964,7 +1154,6 @@ static umode_t scsi_sdev_attr_is_visible(struct kobject *kobj,
 	return attr->mode;
 }
 
-/* Default template for device attributes.  May NOT be modified */
 static struct attribute *scsi_sdev_attrs[] = {
 	&dev_attr_device_blocked.attr,
 	&dev_attr_type.attr,
@@ -983,9 +1172,26 @@ static struct attribute *scsi_sdev_attrs[] = {
 	&dev_attr_iodone_cnt.attr,
 	&dev_attr_ioerr_cnt.attr,
 	&dev_attr_modalias.attr,
+#ifdef MY_ABC_HERE
+	&dev_attr_auto_remap.attr,
+#endif  
 	&dev_attr_queue_depth.attr,
 	&dev_attr_queue_type.attr,
 	&dev_attr_queue_ramp_up_period.attr,
+#ifdef MY_ABC_HERE
+	&dev_attr_syno_idle_time.attr,
+	&dev_attr_syno_spindown.attr,
+	&dev_attr_syno_standby_syncing.attr,
+#endif  
+#ifdef MY_ABC_HERE
+	&dev_attr_syno_scmd_min_timeout.attr,
+#endif  
+#ifdef MY_DEF_HERE
+        &dev_attr_syno_disk_spd.attr,
+#endif  
+#ifdef MY_ABC_HERE
+	&dev_attr_syno_disk_serial.attr,
+#endif  
 	REF_EVT(media_change),
 	REF_EVT(inquiry_change_reported),
 	REF_EVT(capacity_change_reported),
@@ -1034,13 +1240,6 @@ static int scsi_target_add(struct scsi_target *starget)
 	return 0;
 }
 
-/**
- * scsi_sysfs_add_sdev - add scsi device to sysfs
- * @sdev:	scsi_device to add
- *
- * Return value:
- * 	0 on Success / non-zero on Failure
- **/
 int scsi_sysfs_add_sdev(struct scsi_device *sdev)
 {
 	int error, i;
@@ -1071,9 +1270,7 @@ int scsi_sysfs_add_sdev(struct scsi_device *sdev)
 
 	error = scsi_dh_add_device(sdev);
 	if (error)
-		/*
-		 * device_handler is optional, so any error can be ignored
-		 */
+		 
 		sdev_printk(KERN_INFO, sdev,
 				"failed to add device handler: %d\n", error);
 
@@ -1092,12 +1289,10 @@ int scsi_sysfs_add_sdev(struct scsi_device *sdev)
 	error = bsg_register_queue(rq, &sdev->sdev_gendev, NULL, NULL);
 
 	if (error)
-		/* we're treating error on bsg register as non-fatal,
-		 * so pretend nothing went wrong */
+		 
 		sdev_printk(KERN_INFO, sdev,
 			    "Failed to register bsg queue, errno=%d\n", error);
 
-	/* add additional host specific attributes */
 	if (sdev->host->hostt->sdev_attrs) {
 		for (i = 0; sdev->host->hostt->sdev_attrs[i]; i++) {
 			error = device_create_file(&sdev->sdev_gendev,
@@ -1115,11 +1310,6 @@ void __scsi_remove_device(struct scsi_device *sdev)
 {
 	struct device *dev = &sdev->sdev_gendev;
 
-	/*
-	 * This cleanup path is not reentrant and while it is impossible
-	 * to get a new reference with scsi_device_get() someone can still
-	 * hold a previously acquired one.
-	 */
 	if (sdev->sdev_state == SDEV_DEL)
 		return;
 
@@ -1135,11 +1325,6 @@ void __scsi_remove_device(struct scsi_device *sdev)
 	} else
 		put_device(&sdev->sdev_dev);
 
-	/*
-	 * Stop accepting new requests and wait until all queuecommand() and
-	 * scsi_run_queue() invocations have finished before tearing down the
-	 * device.
-	 */
 	scsi_device_set_state(sdev, SDEV_DEL);
 	blk_cleanup_queue(sdev->request_queue);
 	cancel_work_sync(&sdev->requeue_work);
@@ -1148,20 +1333,16 @@ void __scsi_remove_device(struct scsi_device *sdev)
 		sdev->host->hostt->slave_destroy(sdev);
 	transport_destroy_device(dev);
 
-	/*
-	 * Paired with the kref_get() in scsi_sysfs_initialize().  We have
-	 * remoed sysfs visibility from the device, so make the target
-	 * invisible if this was the last device underneath it.
-	 */
 	scsi_target_reap(scsi_target(sdev));
 
 	put_device(dev);
 }
 
-/**
- * scsi_remove_device - unregister a device from the scsi bus
- * @sdev:	scsi_device to unregister
- **/
+#ifdef MY_ABC_HERE
+int (*funcSYNORaidDiskUnplug)(char *szDiskName) = NULL;
+EXPORT_SYMBOL(funcSYNORaidDiskUnplug);
+#endif  
+
 void scsi_remove_device(struct scsi_device *sdev)
 {
 	struct Scsi_Host *shost = sdev->host;
@@ -1169,6 +1350,14 @@ void scsi_remove_device(struct scsi_device *sdev)
 	mutex_lock(&shost->scan_mutex);
 	__scsi_remove_device(sdev);
 	mutex_unlock(&shost->scan_mutex);
+#ifdef MY_DEF_HERE
+	SynoSpinupRemove(sdev);
+#endif  
+#ifdef MY_ABC_HERE
+	if (funcSYNORaidDiskUnplug) {
+		funcSYNORaidDiskUnplug(sdev->syno_disk_name);
+	}
+#endif   
 }
 EXPORT_SYMBOL(scsi_remove_device);
 
@@ -1194,14 +1383,6 @@ static void __scsi_remove_target(struct scsi_target *starget)
 	spin_unlock_irqrestore(shost->host_lock, flags);
 }
 
-/**
- * scsi_remove_target - try to remove a target and all its devices
- * @dev: generic starget or parent of generic stargets to be removed
- *
- * Note: This is slightly racy.  It is possible that if the user
- * requests the addition of another device then the target won't be
- * removed.
- */
 void scsi_remove_target(struct device *dev)
 {
 	struct Scsi_Host *shost = dev_to_shost(dev->parent);
@@ -1212,15 +1393,11 @@ restart:
 	spin_lock_irqsave(shost->host_lock, flags);
 	list_for_each_entry(starget, &shost->__targets, siblings) {
 		if (starget->state == STARGET_DEL ||
-		    starget->state == STARGET_REMOVE ||
-		    starget->state == STARGET_CREATED_REMOVE)
+		    starget->state == STARGET_REMOVE)
 			continue;
 		if (starget->dev.parent == dev || &starget->dev == dev) {
 			kref_get(&starget->reap_ref);
-			if (starget->state == STARGET_CREATED)
-				starget->state = STARGET_CREATED_REMOVE;
-			else
-				starget->state = STARGET_REMOVE;
+			starget->state = STARGET_REMOVE;
 			spin_unlock_irqrestore(shost->host_lock, flags);
 			__scsi_remove_target(starget);
 			scsi_target_reap(starget);
@@ -1247,15 +1424,10 @@ int scsi_register_interface(struct class_interface *intf)
 }
 EXPORT_SYMBOL(scsi_register_interface);
 
-/**
- * scsi_sysfs_add_host - add scsi host to subsystem
- * @shost:     scsi host struct to add to subsystem
- **/
 int scsi_sysfs_add_host(struct Scsi_Host *shost)
 {
 	int error, i;
 
-	/* add host specific attributes */
 	if (shost->hostt->shost_attrs) {
 		for (i = 0; shost->hostt->shost_attrs[i]; i++) {
 			error = device_create_file(&shost->shost_dev,
@@ -1293,13 +1465,7 @@ void scsi_sysfs_device_initialize(struct scsi_device *sdev)
 	sdev->sdev_dev.class = &sdev_class;
 	dev_set_name(&sdev->sdev_dev, "%d:%d:%d:%llu",
 		     sdev->host->host_no, sdev->channel, sdev->id, sdev->lun);
-	/*
-	 * Get a default scsi_level from the target (derived from sibling
-	 * devices).  This is the best we can do for guessing how to set
-	 * sdev->lun_in_cdb for the initial INQUIRY command.  For LUN 0 the
-	 * setting doesn't matter, because all the bits are zero anyway.
-	 * But it does matter for higher LUNs.
-	 */
+	 
 	sdev->scsi_level = starget->scsi_level;
 	if (sdev->scsi_level <= SCSI_2 &&
 			sdev->scsi_level != SCSI_UNKNOWN &&
@@ -1311,11 +1477,7 @@ void scsi_sysfs_device_initialize(struct scsi_device *sdev)
 	list_add_tail(&sdev->same_target_siblings, &starget->devices);
 	list_add_tail(&sdev->siblings, &shost->__devices);
 	spin_unlock_irqrestore(shost->host_lock, flags);
-	/*
-	 * device can now only be removed via __scsi_remove_device() so hold
-	 * the target.  Target will be held in CREATED state until something
-	 * beneath it becomes visible (in which case it moves to RUNNING)
-	 */
+	 
 	kref_get(&starget->reap_ref);
 }
 
@@ -1325,6 +1487,4 @@ int scsi_is_sdev_device(const struct device *dev)
 }
 EXPORT_SYMBOL(scsi_is_sdev_device);
 
-/* A blank transport template that is used in drivers that don't
- * yet implement Transport Attributes */
 struct scsi_transport_template blank_transport_template = { { { {NULL, }, }, }, };

@@ -22,8 +22,9 @@
 # along with the aic94xx driver; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
+ccflags-$(CONFIG_AIC94XX_DEBUG) := -DASD_DEBUG -DASD_ENTER_EXIT
 
-obj-m += aic94xx.o
+obj-$(CONFIG_SCSI_AIC94XX) += aic94xx.o
 aic94xx-y += aic94xx_init.o \
 	     aic94xx_hwi.o  \
 	     aic94xx_reg.o  \

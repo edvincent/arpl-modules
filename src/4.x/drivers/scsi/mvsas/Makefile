@@ -24,7 +24,7 @@
 
 ccflags-$(CONFIG_SCSI_MVSAS_DEBUG) := -DMV_DEBUG
 
-obj-m += mvsas.o
+obj-$(CONFIG_SCSI_MVSAS) += mvsas.o
 mvsas-y +=  mv_init.o  \
            mv_sas.o   \
            mv_64xx.o  \

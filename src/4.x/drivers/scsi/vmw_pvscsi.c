@@ -103,7 +103,6 @@ struct pvscsi_adapter {
 	struct pvscsi_ctx		*cmd_map;
 };
 
-
 /* Command line parameters */
 static int pvscsi_ring_pages;
 static int pvscsi_msg_ring_pages = PVSCSI_DEFAULT_NUM_PAGES_MSG_RING;
@@ -545,14 +544,9 @@ static void pvscsi_complete_request(struct pvscsi_adapter *adapter,
 	    (btstat == BTSTAT_SUCCESS ||
 	     btstat == BTSTAT_LINKED_COMMAND_COMPLETED ||
 	     btstat == BTSTAT_LINKED_COMMAND_COMPLETED_WITH_FLAG)) {
-		if (sdstat == SAM_STAT_COMMAND_TERMINATED) {
-			cmd->result = (DID_RESET << 16);
-		} else {
-			cmd->result = (DID_OK << 16) | sdstat;
-			if (sdstat == SAM_STAT_CHECK_CONDITION &&
-			    cmd->sense_buffer)
-				cmd->result |= (DRIVER_SENSE << 24);
-		}
+		cmd->result = (DID_OK << 16) | sdstat;
+		if (sdstat == SAM_STAT_CHECK_CONDITION && cmd->sense_buffer)
+			cmd->result |= (DRIVER_SENSE << 24);
 	} else
 		switch (btstat) {
 		case BTSTAT_SUCCESS:
@@ -1199,6 +1193,8 @@ static void pvscsi_shutdown_intr(struct pvscsi_adapter *adapter)
 
 static void pvscsi_release_resources(struct pvscsi_adapter *adapter)
 {
+	pvscsi_shutdown_intr(adapter);
+
 	if (adapter->workqueue)
 		destroy_workqueue(adapter->workqueue);
 
@@ -1527,7 +1523,6 @@ static int pvscsi_probe(struct pci_dev *pdev, const struct pci_device_id *id)
 out_reset_adapter:
 	ll_adapter_reset(adapter);
 out_release_resources:
-	pvscsi_shutdown_intr(adapter);
 	pvscsi_release_resources(adapter);
 	scsi_host_put(host);
 out_disable_device:
@@ -1536,7 +1531,6 @@ out_disable_device:
 	return error;
 
 out_release_resources_and_disable:
-	pvscsi_shutdown_intr(adapter);
 	pvscsi_release_resources(adapter);
 	goto out_disable_device;
 }

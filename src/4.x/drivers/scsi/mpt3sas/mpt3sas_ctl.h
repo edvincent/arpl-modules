@@ -3,10 +3,9 @@
  * controllers
  *
  * This code is based on drivers/scsi/mpt3sas/mpt3sas_ctl.h
- * Copyright (C) 2013-2018  LSI Corporation
- * Copyright (C) 2013-2018  Avago Technologies
- * Copyright (C) 2013-2018  Broadcom Inc.
- *  (mailto:MPT-FusionLinux.pdl@broadcom.com)
+ * Copyright (C) 2012-2014  LSI Corporation
+ * Copyright (C) 2013-2014 Avago Technologies
+ *  (mailto: MPT-FusionLinux.pdl@avagotech.com)
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -51,17 +50,6 @@
 #include <linux/miscdevice.h>
 #endif
 
-#include "mpt3sas_base.h"
-
-/**
- * NOTE
- * FWDOWNLOAD - PR is let me know if we need to implement this
- * DIAGBUFFER - PR said hold off
- */
-
-/**
- * HACK - changeme (MPT_MINOR = 220 )
- */
 #ifndef MPT2SAS_MINOR
 #define MPT2SAS_MINOR		(MPT_MINOR + 1)
 #endif
@@ -106,16 +94,6 @@
 	struct mpt3_diag_query)
 #define MPT3DIAGREADBUFFER _IOWR(MPT3_MAGIC_NUMBER, 30, \
 	struct mpt3_diag_read_buffer)
-#define MPT3ADDNLDIAGQUERY _IOWR(MPT3_MAGIC_NUMBER, 32, \
-	struct mpt3_addnl_diag_query)
-
-/* Trace Buffer default UniqueId */
-#define MPT2DIAGBUFFUNIQUEID (0x07075900)
-#define MPT3DIAGBUFFUNIQUEID (0x4252434D)
-
-/* UID not found */
-#define MPT3_DIAG_UID_NOT_FOUND (0xFF)
-
 
 /**
  * struct mpt3_ioctl_header - main header structure
@@ -137,7 +115,6 @@ struct mpt3_ioctl_diag_reset {
 	struct mpt3_ioctl_header hdr;
 };
 
-
 /**
  * struct mpt3_ioctl_pci_info - pci device info
  * @device - pci device id
@@ -157,16 +134,14 @@ struct mpt3_ioctl_pci_info {
 	uint32_t segment_id;
 };
 
-
-#define MPT2_IOCTL_INTERFACE_SCSI		(0x00)
-#define MPT2_IOCTL_INTERFACE_FC			(0x01)
-#define MPT2_IOCTL_INTERFACE_FC_IP		(0x02)
-#define MPT2_IOCTL_INTERFACE_SAS		(0x03)
-#define MPT2_IOCTL_INTERFACE_SAS2		(0x04)
+#define MPT2_IOCTL_INTERFACE_SCSI	(0x00)
+#define MPT2_IOCTL_INTERFACE_FC		(0x01)
+#define MPT2_IOCTL_INTERFACE_FC_IP	(0x02)
+#define MPT2_IOCTL_INTERFACE_SAS	(0x03)
+#define MPT2_IOCTL_INTERFACE_SAS2	(0x04)
 #define MPT2_IOCTL_INTERFACE_SAS2_SSS6200	(0x05)
-#define MPT3_IOCTL_INTERFACE_SAS3		(0x06)
-#define MPT3_IOCTL_INTERFACE_SAS35		(0x07)
-#define MPT2_IOCTL_VERSION_LENGTH		(32)
+#define MPT3_IOCTL_INTERFACE_SAS3	(0x06)
+#define MPT2_IOCTL_VERSION_LENGTH	(32)
 
 /**
  * struct mpt3_ioctl_iocinfo - generic controller info
@@ -204,9 +179,8 @@ struct mpt3_ioctl_iocinfo {
 	struct mpt3_ioctl_pci_info pci_information;
 };
 
-
 /* number of event log entries */
-#define MPT3SAS_CTL_EVENT_LOG_SIZE (200)
+#define MPT3SAS_CTL_EVENT_LOG_SIZE (50)
 
 /**
  * struct mpt3_ioctl_eventquery - query event count and type
@@ -326,13 +300,10 @@ struct mpt3_ioctl_btdh_mapping {
 	uint16_t rsvd;
 };
 
-
-
 /* application flags for mpt3_diag_register, mpt3_diag_query */
 #define MPT3_APP_FLAGS_APP_OWNED	(0x0001)
 #define MPT3_APP_FLAGS_BUFFER_VALID	(0x0002)
 #define MPT3_APP_FLAGS_FW_BUFFER_ACCESS	(0x0004)
-#define MPT3_APP_FLAGS_DYNAMIC_BUFFER_ALLOC (0x0008)
 
 /* flags for mpt3_diag_read_buffer */
 #define MPT3_FLAGS_REREGISTER		(0x0001)
@@ -444,20 +415,4 @@ struct mpt3_diag_read_buffer {
 	uint32_t diagnostic_data[1];
 };
 
-/**
- * struct mpt3_addnl_diag_query - diagnostic buffer release reason
- * @hdr - generic header
- * @unique_id - unique id associated with this buffer.
- * @rel_query - release query.
- * @reserved2
- */
-struct mpt3_addnl_diag_query {
-	struct mpt3_ioctl_header hdr;
-	uint32_t unique_id;
-	struct htb_rel_query rel_query;
-	uint32_t reserved2[2];
-};
-
-/* Chunk size to use when doing a FW Download */
-#define FW_DL_CHUNK_SIZE 0x4000
 #endif /* MPT3SAS_CTL_H_INCLUDED */
