@@ -45,7 +45,7 @@
 #ifdef MY_ABC_HERE
 #include <linux/libata.h>
 #include <linux/usb.h>
-#include "../usb/storage/usb.h"
+###include "../usb/storage/usb.h"
 #endif  
 #ifdef MY_DEF_HERE
 #include <linux/synolib.h>
