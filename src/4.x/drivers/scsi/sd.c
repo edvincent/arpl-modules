@@ -3282,7 +3282,7 @@ SYNO_SKIP_WANT_RETRY:
 			}
 #endif  
 			start_index = index - CONFIG_SYNO_SCSI_DEVICE_INDEX;
-			error = sd_format_disk_name(CONFIG_SYNO_ISCSI_DEVICE_NEW_PREFIX, start_index, gd->disk_name, DISK_NAME_LEN);
+			error = sd_format_disk_name(CONFIG_SYNO_ISCSI_DEVICE_PREFIX, start_index, gd->disk_name, DISK_NAME_LEN);
 			printk("got iSCSI disk[%d]\n", start_index);
 			break;
 #endif  
@@ -3316,7 +3316,7 @@ SYNO_SKIP_WANT_RETRY:
 #ifdef MY_ABC_HERE
 			}
 #endif  
-			error = sd_format_disk_name(CONFIG_SYNO_ISCSI_DEVICE_NEW_PREFIX, index, gd->disk_name, DISK_NAME_LEN);
+			error = sd_format_disk_name(CONFIG_SYNO_ISCSI_DEVICE_PREFIX, index, gd->disk_name, DISK_NAME_LEN);
 			break;
 #ifdef MY_DEF_HERE
 		case SYNO_DISK_CACHE:
@@ -3331,7 +3331,7 @@ SYNO_SKIP_WANT_RETRY:
 				break;
 			}
 #endif  
-			error = sd_format_disk_name(CONFIG_SYNO_SATA_DEVICE_NEW_PREFIX, index, gd->disk_name, DISK_NAME_LEN);
+			error = sd_format_disk_name(CONFIG_SYNO_SATA_DEVICE_PREFIX, index, gd->disk_name, DISK_NAME_LEN);
 			break;
 	}
 #else
