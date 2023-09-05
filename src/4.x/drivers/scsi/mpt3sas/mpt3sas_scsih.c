@@ -15721,7 +15721,6 @@ static struct scsi_host_template mpt2sas_driver_template = {
 #if defined(MY_ABC_HERE)
 	.syno_port_type			= SYNO_PORT_TYPE_SAS,
 #endif /* MY_ABC_HERE */
-	.cmd_size			= sizeof(struct scsiio_tracker),
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3,16,0))
 	.cmd_size           = sizeof(struct scsiio_tracker),
 #endif
@@ -15784,6 +15783,9 @@ static struct scsi_host_template mpt3sas_driver_template = {
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3,19,0))
 	.track_queue_depth              = 1,
 #endif
+#if defined(MY_ABC_HERE)
+	.syno_port_type			= SYNO_PORT_TYPE_SAS,
+#endif /* MY_ABC_HERE */
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3,16,0))
 	.cmd_size           = sizeof(struct scsiio_tracker),
 #endif
@@ -17010,4 +17012,3 @@ _mpt3sas_exit(void)
 
 module_init(_mpt3sas_init);
 module_exit(_mpt3sas_exit);
-
