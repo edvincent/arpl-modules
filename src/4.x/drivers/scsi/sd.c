@@ -34,7 +34,6 @@
  *	Note: when the logging level is set by the user, it must be greater
  *	than the level indicated above to trigger output.	
  */
-
 #include <linux/module.h>
 #include <linux/fs.h>
 #include <linux/kernel.h>
@@ -4346,6 +4345,12 @@ static int sd_probe(struct device *dev)
 	bool blSASInternalDevice = SYNOSASIsDeviceInteralDrive(dev);
 #endif /* MY_DEF_HERE */
 
+/* print size of structure */
+	printf("sizeof(struct device): %lu\n", sizeof(struct device));
+	printf("sizeof(struct scsi_device): %lu\n", sizeof(struct scsi_device));
+	printf("sizeof(struct scsi_disk): %lu\n", sizeof(struct scsi_disk));
+	printf("sizeof(struct gendisk): %lu\n", sizeof(struct gendisk));
+	
 	scsi_autopm_get_device(sdp);
 	error = -ENODEV;
 	if (sdp->type != TYPE_DISK && sdp->type != TYPE_MOD && sdp->type != TYPE_RBC)
