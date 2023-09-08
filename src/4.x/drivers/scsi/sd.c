@@ -1,5 +1,5 @@
-#ifndef MY_DEF_HERE
-#define MY_DEF_HERE
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
 #endif
 /*
  *      sd.c Copyright (C) 1992 Drew Eckhardt
