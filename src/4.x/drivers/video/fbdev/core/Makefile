@@ -3,6 +3,10 @@
 obj-$(CONFIG_FB)                  += fb.o
 fb-y                              := fbmem.o fbmon.o fbcmap.o fbsysfs.o \
                                      modedb.o fbcvt.o
+
+ifeq ($(CONFIG_FB_DEFERRED_IO), m)
+	EXTRA_CFLAGS += -DCONFIG_FB_DEFERRED_IO
+endif
 fb-$(CONFIG_FB_DEFERRED_IO)       += fb_defio.o
 fb-objs                           := $(fb-y)
 
