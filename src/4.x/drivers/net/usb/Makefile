@@ -2,14 +2,22 @@
 # Makefile for USB Network drivers
 #
 
+# for ax88172a
+ifeq ($(CONFIG_V1000), y)
+	 EXTRA_CFLAGS+=-DMY_DEF_HERE
+endif
+ifeq ($(CONFIG_R1000), y)
+	 EXTRA_CFLAGS+=-DMY_DEF_HERE
+endif
+
 #obj-$(CONFIG_USB_CATC)		+= catc.o
 #obj-$(CONFIG_USB_KAWETH)	+= kaweth.o
 #obj-$(CONFIG_USB_PEGASUS)	+= pegasus.o
-#obj-$(CONFIG_USB_RTL8150)	+= rtl8150.o
+obj-$(CONFIG_USB_RTL8150)	+= rtl8150.o
 #obj-$(CONFIG_USB_HSO)		+= hso.o
 #obj-$(CONFIG_USB_LAN78XX)	+= lan78xx.o
-#obj-$(CONFIG_USB_NET_AX8817X)	+= asix.o
-#asix-y := asix_devices.o asix_common.o ax88172a.o
+obj-$(CONFIG_USB_NET_AX8817X)	+= asix.o
+asix-y := asix_devices.o asix_common.o ax88172a.o
 obj-$(CONFIG_USB_NET_AX88179_178A)      += ax88179_178a.o
 #obj-$(CONFIG_USB_NET_CDCETHER)	+= cdc_ether.o
 #obj-$(CONFIG_USB_NET_CDC_EEM)	+= cdc_eem.o
