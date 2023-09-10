@@ -2,6 +2,14 @@
 # Makefile for the Linux ACPI interpreter
 #
 
+# for button
+ifeq ($(CONFIG_V1000), y)
+	 EXTRA_CFLAGS+=-DMY_DEF_HERE
+endif
+ifeq ($(CONFIG_R1000), y)
+	 EXTRA_CFLAGS+=-DMY_DEF_HERE
+endif
+
 ccflags-$(CONFIG_ACPI_DEBUG)	+= -DACPI_DEBUG_OUTPUT
 
 #
