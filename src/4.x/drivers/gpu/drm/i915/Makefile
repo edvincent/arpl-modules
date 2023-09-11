@@ -44,9 +44,9 @@ i915-y := i915_drv.o \
 	  intel_pm.o \
 	  intel_runtime_pm.o
 
-i915-$(CONFIG_COMPAT)   += i915_ioc32.o
-i915-$(CONFIG_DEBUG_FS) += i915_debugfs.o intel_pipe_crc.o
-i915-$(CONFIG_PERF_EVENTS) += i915_pmu.o
+i915-y   += i915_ioc32.o
+i915-y += i915_debugfs.o intel_pipe_crc.o
+i915-y += i915_pmu.o
 
 # GEM code
 i915-y += i915_cmd_parser.o \
@@ -114,8 +114,8 @@ i915-y += intel_audio.o \
 	  intel_psr.o \
 	  intel_sideband.o \
 	  intel_sprite.o
-i915-$(CONFIG_ACPI)		+= intel_acpi.o intel_opregion.o
-i915-$(CONFIG_DRM_FBDEV_EMULATION)	+= intel_fbdev.o
+i915-y		+= intel_acpi.o intel_opregion.o
+i915-y	+= intel_fbdev.o
 
 # modesetting output/encoder code
 i915-y += dvo_ch7017.o \
@@ -176,4 +176,4 @@ endif
 # LPE Audio for VLV and CHT
 i915-y += intel_lpe_audio.o
 
-obj-$(CONFIG_DRM_I915) += i915.o
+obj-m += i915.o
