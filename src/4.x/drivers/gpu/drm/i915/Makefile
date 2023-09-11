@@ -176,4 +176,4 @@ endif
 # LPE Audio for VLV and CHT
 i915-y += intel_lpe_audio.o
 
-obj-m += i915.o
+obj-y += i915.o
