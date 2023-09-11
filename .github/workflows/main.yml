@@ -20,18 +20,20 @@ jobs:
           ls -d *-*/ | grep -v -e "arpl-modules/"
           for D in `ls -d *-*/`; do
             E=$(echo ${D} | sed 's#/##')
-            if [ ${E} == "epyc7002-7.1-5.10.55" ]||[ ${E} == "epyc7002-7.2-5.10.55" ]; then
+            #if [ ${E} == "epyc7002-7.1-5.10.55" ]||[ ${E} == "epyc7002-7.2-5.10.55" ]; then
               echo "clean ${E} directory"
               rm -f ./${E}/*
               echo "extract ${E} wjz304's module pack"
               tar -xaf /tmp/${E}.tgz -C ./${E}/
-            fi
+            #fi
             echo "copy ${E} vanilla module"
             [ -d ./vanilla/${E} ] && cp -vf ./vanilla/${E}/*.ko ./${E}/
             (cd ${E} && tar caf ../${E}.tgz *)
             sha256sum ./${E}.tgz | awk '{print $1}' | awk '{print $1 " '${E}.tgz' modpack.sha256"}' >> files-chksum
           done
-          (cd thirdparty/firmware && tar caf ../../firmware.tgz *)
+          #(cd thirdparty/firmware && tar caf ../../firmware.tgz *)
+          echo "copy wjz304's firmware.tgz"
+          cp -vf /tmp/firmware.tgz ./firmware.tgz
           sha256sum ./firmware.tgz | awk '{print $1}' | awk '{print $1 " 'firmware.tgz' firmware.sha256"}' >> files-chksum
           cat files-chksum
 
