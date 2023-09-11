@@ -14,20 +14,20 @@ drm-y       :=	drm_auth.o drm_bufs.o drm_cache.o \
 		drm_rect.o drm_vma_manager.o drm_flip_work.o \
 		drm_modeset_lock.o drm_atomic.o drm_bridge.o
 
-drm-$(CONFIG_COMPAT) += drm_ioc32.o
-drm-$(CONFIG_DRM_GEM_CMA_HELPER) += drm_gem_cma_helper.o
-drm-$(CONFIG_PCI) += ati_pcigart.o
-drm-$(CONFIG_DRM_PANEL) += drm_panel.o
-drm-$(CONFIG_OF) += drm_of.o
-drm-$(CONFIG_AGP) += drm_agpsupport.o
+drm-y += drm_ioc32.o
+drm-y += drm_gem_cma_helper.o
+drm-y += ati_pcigart.o
+drm-y += drm_panel.o
+drm-y += drm_of.o
+drm-y += drm_agpsupport.o
 
 drm-y += $(drm-m)
 
 drm_kms_helper-y := drm_crtc_helper.o drm_dp_helper.o drm_probe_helper.o \
 		drm_plane_helper.o drm_dp_mst_topology.o drm_atomic_helper.o
-drm_kms_helper-$(CONFIG_DRM_LOAD_EDID_FIRMWARE) += drm_edid_load.o
-drm_kms_helper-$(CONFIG_DRM_FBDEV_EMULATION) += drm_fb_helper.o
-drm_kms_helper-$(CONFIG_DRM_KMS_CMA_HELPER) += drm_fb_cma_helper.o
+drm_kms_helper-y += drm_edid_load.o
+drm_kms_helper-y += drm_fb_helper.o
+drm_kms_helper-y += drm_fb_cma_helper.o
 
 obj-$(CONFIG_DRM_KMS_HELPER) += drm_kms_helper.o
 
