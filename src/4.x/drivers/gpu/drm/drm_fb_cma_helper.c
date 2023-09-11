@@ -149,7 +149,7 @@ static struct fb_ops drm_fbdev_cma_ops = {
 static int drm_fbdev_cma_deferred_io_mmap(struct fb_info *info,
 					  struct vm_area_struct *vma)
 {
-	fb_deferred_io_mmap(info, vma);
+	fb_deferred_io_open(info, vma);
 	vma->vm_page_prot = pgprot_writecombine(vma->vm_page_prot);
 
 	return 0;
