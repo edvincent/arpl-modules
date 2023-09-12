@@ -23,7 +23,7 @@ jobs:
             #if [ ${E} == "epyc7002-7.1-5.10.55" ]||[ ${E} == "epyc7002-7.2-5.10.55" ]; then
               echo "clean ${E} directory"
               mv -vf mpt3sas.ko mpt3sas.ko.bak
-              rm -f ./${E}/*
+              rm -f ./${E}/*.ko
               echo "extract ${E} wjz304's module pack"
               tar -xaf /tmp/${E}.tgz -C ./${E}/
               mv -vf mpt3sas.ko.bak mpt3sas.ko
