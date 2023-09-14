@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: GPL-2.0
 #
 # SATA/PATA driver configuration
 #
@@ -184,6 +183,16 @@ config AHCI_QORIQ
 	  onboard AHCI SATA.
 
 	  If unsure, say N.
+
+if SYNO_LSP_RTD129X || SYNO_LSP_RTD1619
+config AHCI_RTK
+	tristate "Realtek AHCI SATA support"
+	help
+	  This option enables support for Realtek AHCI Serial ATA
+	  controllers.
+
+	  If unsure, say N.
+endif # SYNO_LSP_RTD129X || SYNO_LSP_RTD1619
 
 config SATA_FSL
 	tristate "Freescale 3.0Gbps SATA support"
