@@ -20,6 +20,8 @@ obj-y	+= ahci_st.o libahci.o libahci_platform.o
 obj-y	+= ahci_tegra.o libahci.o libahci_platform.o
 obj-y	+= ahci_xgene.o libahci.o libahci_platform.o
 obj-y	+= ahci_qoriq.o libahci.o libahci_platform.o
+obj-y	+= ahci_rtk.o libahci.o libahci_platform.o
+obj-y	+= ahci_rtk_1619.o libahci.o libahci_platform.o
 
 # SFF w/ custom DMA
 obj-y	+= pdc_adma.o
@@ -27,6 +29,7 @@ obj-y	+= pata_arasan_cf.o
 obj-y	+= pata_octeon_cf.o
 obj-y	+= sata_qstor.o
 obj-y	+= sata_sx4.o
+obj-y	+= ata_syno_i2c.o
 
 # SFF SATA w/ BMDMA
 obj-m	+= ata_piix.o
