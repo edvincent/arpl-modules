@@ -8,7 +8,7 @@
 #######################################
 
 PWD           := $(shell pwd)
-KVERSION      := 4.4.302+
+KVERSION      := 4.4.180+
 EXPECTED_KDIR := $(KSRC)
 INSTDIR       := /lib/modules/$(KVERSION)/kernel/drivers/net
 PM_DIR        := /etc/pm/config.d
