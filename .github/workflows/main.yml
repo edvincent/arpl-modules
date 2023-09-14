@@ -23,10 +23,12 @@ jobs:
             #if [ ${E} == "epyc7002-7.1-5.10.55" ]||[ ${E} == "epyc7002-7.2-5.10.55" ]; then
               echo "clean ${E} directory"
               mv -vf ./${E}/mpt3sas.ko ./${E}/mpt3sas.ko.bak
+              mv -vf ./${E}/tn40xx.ko ./${E}/tn40xx.ko.bak
               rm -f ./${E}/*.ko
               echo "extract ${E} wjz304's module pack"
               tar -xaf /tmp/${E}.tgz -C ./${E}/
               mv -vf ./${E}/mpt3sas.ko.bak ./${E}/mpt3sas.ko
+              mv -vf ./${E}/tn40xx.ko.bak ./${E}/tn40xx.ko
             #fi
             echo "copy ${E} vanilla module"
             [ -d ./vanilla/${E} ] && cp -vf ./vanilla/${E}/*.ko ./${E}/
