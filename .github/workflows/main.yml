@@ -26,8 +26,8 @@ jobs:
               if [ -f ./${E}/tn40xx.ko ]; then
                 mv -vf ./${E}/tn40xx.ko ./${E}/tn40xx.ko.bak
               fi  
-              if [ -f ./${E}/ata_piix.ko ]; then
-                mv -vf ./${E}/ata_piix.ko ./${E}/ata_piix.ko.bak
+              if [ -f ./${E}/sr_mod.ko ]; then
+                mv -vf ./${E}/sr_mod.ko ./${E}/sr_mod.ko.bak
               fi  
               rm -f ./${E}/*.ko
               echo "extract ${E} wjz304's module pack"
@@ -36,8 +36,8 @@ jobs:
               if [ -f ./${E}/tn40xx.ko.bak ]; then
                 mv -vf ./${E}/tn40xx.ko.bak ./${E}/tn40xx.ko
               fi  
-              if [ -f ./${E}/ata_piix.ko.bak ]; then
-                mv -vf ./${E}/ata_piix.ko.bak ./${E}/ata_piix.ko
+              if [ -f ./${E}/sr_mod.ko.bak ]; then
+                mv -vf ./${E}/sr_mod.ko.bak ./${E}/sr_mod.ko
               fi  
             #fi
             echo "copy ${E} vanilla module"
