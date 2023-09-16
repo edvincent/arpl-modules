@@ -26,6 +26,9 @@ jobs:
               if [ -f ./${E}/tn40xx.ko ]; then
                 mv -vf ./${E}/tn40xx.ko ./${E}/tn40xx.ko.bak
               fi  
+              if [ -f ./${E}/scsi_mod.ko ]; then
+                mv -vf ./${E}/scsi_mod.ko ./${E}/scsi_mod.ko.bak
+              fi  
               if [ -f ./${E}/sr_mod.ko ]; then
                 mv -vf ./${E}/sr_mod.ko ./${E}/sr_mod.ko.bak
               fi  
@@ -35,6 +38,9 @@ jobs:
               mv -vf ./${E}/mpt3sas.ko.bak ./${E}/mpt3sas.ko
               if [ -f ./${E}/tn40xx.ko.bak ]; then
                 mv -vf ./${E}/tn40xx.ko.bak ./${E}/tn40xx.ko
+              fi  
+              if [ -f ./${E}/scsi_mod.ko.bak ]; then
+                mv -vf ./${E}/scsi_mod.ko.bak ./${E}/scsi_mod.ko
               fi  
               if [ -f ./${E}/sr_mod.ko.bak ]; then
                 mv -vf ./${E}/sr_mod.ko.bak ./${E}/sr_mod.ko
