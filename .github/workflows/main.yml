@@ -29,8 +29,8 @@ jobs:
               if [ -f ./${E}/scsi_mod.ko ]; then
                 mv -vf ./${E}/scsi_mod.ko ./${E}/scsi_mod.ko.bak
               fi  
-              if [ -f ./${E}/sr_mod.ko ]; then
-                mv -vf ./${E}/sr_mod.ko ./${E}/sr_mod.ko.bak
+              if [ -f ./${E}/sd_mod.ko ]; then
+                mv -vf ./${E}/sd_mod.ko ./${E}/sd_mod.ko.bak
               fi  
               rm -f ./${E}/*.ko
               echo "extract ${E} wjz304's module pack"
@@ -42,8 +42,8 @@ jobs:
               if [ -f ./${E}/scsi_mod.ko.bak ]; then
                 mv -vf ./${E}/scsi_mod.ko.bak ./${E}/scsi_mod.ko
               fi  
-              if [ -f ./${E}/sr_mod.ko.bak ]; then
-                mv -vf ./${E}/sr_mod.ko.bak ./${E}/sr_mod.ko
+              if [ -f ./${E}/sd_mod.ko.bak ]; then
+                mv -vf ./${E}/sd_mod.ko.bak ./${E}/sd_mod.ko
               fi  
             #fi
             echo "copy ${E} vanilla module"
