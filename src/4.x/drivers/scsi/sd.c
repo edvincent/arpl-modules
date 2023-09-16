@@ -4346,10 +4346,10 @@ static int sd_probe(struct device *dev)
 #endif /* MY_DEF_HERE */
 
 /* print size of structure */
-	printf("sizeof(struct device): %lu\n", sizeof(struct device));
-	printf("sizeof(struct scsi_device): %lu\n", sizeof(struct scsi_device));
-	printf("sizeof(struct scsi_disk): %lu\n", sizeof(struct scsi_disk));
-	printf("sizeof(struct gendisk): %lu\n", sizeof(struct gendisk));
+	printk("sizeof(struct device): %lu\n", sizeof(struct device));
+	printk("sizeof(struct scsi_device): %lu\n", sizeof(struct scsi_device));
+	printk("sizeof(struct scsi_disk): %lu\n", sizeof(struct scsi_disk));
+	printk("sizeof(struct gendisk): %lu\n", sizeof(struct gendisk));
 	
 	scsi_autopm_get_device(sdp);
 	error = -ENODEV;
