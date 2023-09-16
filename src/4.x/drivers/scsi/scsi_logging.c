@@ -19,6 +19,7 @@
 #include <scsi/scsi_eh.h>
 #include <scsi/scsi_dbg.h>
 
+#define SCSI_LOG_BUFSIZE 128
 #define SCSI_LOG_SPOOLSIZE 4096
 
 #if (SCSI_LOG_SPOOLSIZE / SCSI_LOG_BUFSIZE) > BITS_PER_LONG
@@ -33,7 +34,7 @@
 #endif /* MY_ABC_HERE */
 
 struct scsi_log_buf {
-	char buffer[SCSI_LOG_SPOOLSIZE];
+	char buffer[SCSI_LOG_BUFSIZE];
 	unsigned long map;
 };
 
@@ -42,7 +43,7 @@ static DEFINE_PER_CPU(struct scsi_log_buf, scsi_format_log);
 static char *scsi_log_reserve_buffer(size_t *len)
 {
 	struct scsi_log_buf *buf;
-	unsigned long map_bits = sizeof(buf->buffer) / SCSI_LOG_BUFSIZE;
+	unsigned long map_bits = sizeof(buf->buffer) / SCSI_LOG_SPOOLSIZE;
 	unsigned long idx = 0;
 
 	preempt_disable();
@@ -59,7 +60,7 @@ static char *scsi_log_reserve_buffer(size_t *len)
 		preempt_enable();
 		return NULL;
 	}
-	*len = SCSI_LOG_BUFSIZE;
+	*len = SCSI_LOG_SPOOLSIZE;
 	return buf->buffer + idx * SCSI_LOG_BUFSIZE;
 }
 
