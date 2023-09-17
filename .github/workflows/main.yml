@@ -21,30 +21,31 @@ jobs:
           for D in `ls -d *-*/`; do
             E=$(echo ${D} | sed 's#/##')
             #if [ ${E} == "epyc7002-7.1-5.10.55" ]||[ ${E} == "epyc7002-7.2-5.10.55" ]; then
-              echo "clean ${E} directory"
-              mv -vf ./${E}/mpt3sas.ko ./${E}/mpt3sas.ko.bak
-              if [ -f ./${E}/tn40xx.ko ]; then
-                mv -vf ./${E}/tn40xx.ko ./${E}/tn40xx.ko.bak
-              fi  
-              if [ -f ./${E}/scsi_mod.ko ]; then
-                mv -vf ./${E}/scsi_mod.ko ./${E}/scsi_mod.ko.bak
-              fi  
-              if [ -f ./${E}/sd_mod.ko ]; then
-                mv -vf ./${E}/sd_mod.ko ./${E}/sd_mod.ko.bak
-              fi  
-              rm -f ./${E}/*.ko
-              echo "extract ${E} wjz304's module pack"
+              echo "backup ${E} tcrp modules"
+              mv -vf ./${E}/*.ko ./${E}/*.ko.bak
+              #if [ -f ./${E}/tn40xx.ko ]; then
+              #  mv -vf ./${E}/tn40xx.ko ./${E}/tn40xx.ko.bak
+              #fi  
+              #if [ -f ./${E}/scsi_mod.ko ]; then
+              #  mv -vf ./${E}/scsi_mod.ko ./${E}/scsi_mod.ko.bak
+              #fi  
+              #if [ -f ./${E}/sd_mod.ko ]; then
+              #  mv -vf ./${E}/sd_mod.ko ./${E}/sd_mod.ko.bak
+              #fi  
+              #rm -f ./${E}/*.ko
+              echo "extract ${E} wjz304's arpl-i18n module pack"
               tar -xaf /tmp/${E}.tgz -C ./${E}/
-              mv -vf ./${E}/mpt3sas.ko.bak ./${E}/mpt3sas.ko
-              if [ -f ./${E}/tn40xx.ko.bak ]; then
-                mv -vf ./${E}/tn40xx.ko.bak ./${E}/tn40xx.ko
-              fi  
-              if [ -f ./${E}/scsi_mod.ko.bak ]; then
-                mv -vf ./${E}/scsi_mod.ko.bak ./${E}/scsi_mod.ko
-              fi  
-              if [ -f ./${E}/sd_mod.ko.bak ]; then
-                mv -vf ./${E}/sd_mod.ko.bak ./${E}/sd_mod.ko
-              fi  
+              echo "restore ${E} tcrp modules"
+              mv -vf ./${E}/*.ko.bak ./${E}/*.ko
+              #if [ -f ./${E}/tn40xx.ko.bak ]; then
+              #  mv -vf ./${E}/tn40xx.ko.bak ./${E}/tn40xx.ko
+              #fi  
+              #if [ -f ./${E}/scsi_mod.ko.bak ]; then
+              #  mv -vf ./${E}/scsi_mod.ko.bak ./${E}/scsi_mod.ko
+              #fi  
+              #if [ -f ./${E}/sd_mod.ko.bak ]; then
+              #  mv -vf ./${E}/sd_mod.ko.bak ./${E}/sd_mod.ko
+              #fi  
             #fi
             echo "copy ${E} vanilla module"
             [ -d ./vanilla/${E} ] && cp -vf ./vanilla/${E}/*.ko ./${E}/
