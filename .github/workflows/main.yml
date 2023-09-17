@@ -22,7 +22,12 @@ jobs:
             E=$(echo ${D} | sed 's#/##')
             #if [ ${E} == "epyc7002-7.1-5.10.55" ]||[ ${E} == "epyc7002-7.2-5.10.55" ]; then
               echo "backup ${E} tcrp modules"
-              mv -vf ./${E}/*.ko ./${E}/*.ko.bak
+              for file in "$E"/*.ko; do
+                if [ -f "$file" ]; then
+                  new_name="${file}.bak"
+                  mv -vf "$file" "$new_name"                
+                fi
+              done
               #if [ -f ./${E}/tn40xx.ko ]; then
               #  mv -vf ./${E}/tn40xx.ko ./${E}/tn40xx.ko.bak
               #fi  
@@ -36,7 +41,12 @@ jobs:
               echo "extract ${E} wjz304's arpl-i18n module pack"
               tar -xaf /tmp/${E}.tgz -C ./${E}/
               echo "restore ${E} tcrp modules"
-              mv -vf ./${E}/*.ko.bak ./${E}/*.ko
+              for file in "$E"/*.ko.bak; do
+                if [ -f "$file" ]; then
+                  new_name="${file%.bak}"
+                  mv -vf "$file" "$new_name"                
+                fi
+              done
               #if [ -f ./${E}/tn40xx.ko.bak ]; then
               #  mv -vf ./${E}/tn40xx.ko.bak ./${E}/tn40xx.ko
               #fi  
