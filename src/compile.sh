@@ -26,6 +26,9 @@ while read PLATFORM KVER; do
       cp ~/src/pats/modules/${PLATFORM}/$M "${PWD}/../${PLATFORM}-${KVER}" || \
       # compiled
       cp /tmp/${PLATFORM}-${KVER}/$M "${PWD}/../${PLATFORM}-${KVER}"
+      # remove i915 related modules
+      rm ${PWD}/../${PLATFORM}-${KVER}/cfbfillrect.ko ${PWD}/../${PLATFORM}-${KVER}/cfbimgblt.ko ${PWD}/../${PLATFORM}-${KVER}/cfbcopyarea.ko ${PWD}/../${PLATFORM}-${KVER}/video.ko ${PWD}/../${PLATFORM}-${KVER}/backlight.ko 
+      rm ${PWD}/../${PLATFORM}-${KVER}/button.ko ${PWD}/../${PLATFORM}-${KVER}/drm_kms_helper.ko ${PWD}/../${PLATFORM}-${KVER}/drm.ko ${PWD}/../${PLATFORM}-${KVER}/fb.ko ${PWD}/../${PLATFORM}-${KVER}/fbdev.ko ${PWD}/../${PLATFORM}-${KVER}/i2c-algo-bit.ko
   done
   rm -rf /tmp/${PLATFORM}-${KVER}
 done < PLATFORMS
