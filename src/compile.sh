@@ -27,8 +27,17 @@ while read PLATFORM KVER; do
       # compiled
       cp /tmp/${PLATFORM}-${KVER}/$M "${PWD}/../${PLATFORM}-${KVER}"
       # remove i915 related modules
-      rm ${PWD}/../${PLATFORM}-${KVER}/cfbfillrect.ko ${PWD}/../${PLATFORM}-${KVER}/cfbimgblt.ko ${PWD}/../${PLATFORM}-${KVER}/cfbcopyarea.ko ${PWD}/../${PLATFORM}-${KVER}/video.ko ${PWD}/../${PLATFORM}-${KVER}/backlight.ko 
-      rm ${PWD}/../${PLATFORM}-${KVER}/button.ko ${PWD}/../${PLATFORM}-${KVER}/drm_kms_helper.ko ${PWD}/../${PLATFORM}-${KVER}/drm.ko ${PWD}/../${PLATFORM}-${KVER}/fb.ko ${PWD}/../${PLATFORM}-${KVER}/fbdev.ko ${PWD}/../${PLATFORM}-${KVER}/i2c-algo-bit.ko
+      [[ -f ${PWD}/../${PLATFORM}-${KVER}/cfbfillrect.ko ]] && rm ${PWD}/../${PLATFORM}-${KVER}/cfbfillrect.ko 
+      [[ -f ${PWD}/../${PLATFORM}-${KVER}/cfbimgblt.ko ]] && rm ${PWD}/../${PLATFORM}-${KVER}/cfbimgblt.ko 
+      [[ -f ${PWD}/../${PLATFORM}-${KVER}/cfbcopyarea.ko ]] && rm ${PWD}/../${PLATFORM}-${KVER}/cfbcopyarea.ko 
+      [[ -f ${PWD}/../${PLATFORM}-${KVER}/video.ko ]] && rm ${PWD}/../${PLATFORM}-${KVER}/video.ko 
+      [[ -f ${PWD}/../${PLATFORM}-${KVER}/backlight.ko ]] && rm ${PWD}/../${PLATFORM}-${KVER}/backlight.ko 
+      [[ -f ${PWD}/../${PLATFORM}-${KVER}/button.ko ]] && rm ${PWD}/../${PLATFORM}-${KVER}/button.ko 
+      [[ -f ${PWD}/../${PLATFORM}-${KVER}/drm_kms_helper.ko ]] && rm ${PWD}/../${PLATFORM}-${KVER}/drm_kms_helper.ko 
+      [[ -f ${PWD}/../${PLATFORM}-${KVER}/drm.ko ]] && rm ${PWD}/../${PLATFORM}-${KVER}/drm.ko 
+      [[ -f ${PWD}/../${PLATFORM}-${KVER}/fb.ko ]] && rm ${PWD}/../${PLATFORM}-${KVER}/fb.ko 
+      [[ -f ${PWD}/../${PLATFORM}-${KVER}/fbdev.ko ]] && rm ${PWD}/../${PLATFORM}-${KVER}/fbdev.ko 
+      [[ -f ${PWD}/../${PLATFORM}-${KVER}/i2c-algo-bit.ko ]] && rm ${PWD}/../${PLATFORM}-${KVER}/i2c-algo-bit.ko
   done
   rm -rf /tmp/${PLATFORM}-${KVER}
 done < PLATFORMS
