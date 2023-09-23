@@ -127,7 +127,8 @@
  *  12-17-18  02.00.54  Bumped MPI2_HEADER_VERSION_UNIT
  *  06-24-19  02.00.55  Bumped MPI2_HEADER_VERSION_UNIT
  *  08-01-19  02.00.56  Bumped MPI2_HEADER_VERSION_UNIT
- *  10-02-19  02.00.56  Bumped MPI2_HEADER_VERSION_UNIT
+ *  10-02-19  02.00.57  Bumped MPI2_HEADER_VERSION_UNIT
+ *  07-20-20  02.00.58  Bumped MPI2_HEADER_VERSION_UNIT
  *  --------------------------------------------------------------------------
  */
 
@@ -171,7 +172,7 @@
 
 
 /* Unit and Dev versioning for this MPI header set */
-#define MPI2_HEADER_VERSION_UNIT            (0x39)
+#define MPI2_HEADER_VERSION_UNIT            (0x3A)
 #define MPI2_HEADER_VERSION_DEV             (0x00)
 #define MPI2_HEADER_VERSION_UNIT_MASK       (0xFF00)
 #define MPI2_HEADER_VERSION_UNIT_SHIFT      (8)
@@ -783,6 +784,13 @@ typedef union _MPI2_REPLY_DESCRIPTORS_UNION
 #define MPI2_IOCSTATUS_TARGET_NAK_RECEIVED          (0x0071)
 
 /****************************************************************************
+*  SPDM values
+****************************************************************************/
+
+#define MPI26_IOCSTATUS_CERT_IMPORT_INVALID         (0x0080)
+#define MPI26_IOCSTATUS_CERT_EXPORT_INVALID         (0x0081)
+
+/****************************************************************************
 *  Serial Attached SCSI values
 ****************************************************************************/
 
@@ -800,6 +808,14 @@ typedef union _MPI2_REPLY_DESCRIPTORS_UNION
 ****************************************************************************/
 
 #define MPI2_IOCSTATUS_RAID_ACCEL_ERROR             (0x00B0)
+
+/****************************************************************************
+*  Security related values
+****************************************************************************/
+
+#define MPI26_IOCSTATUS_INVALID_CERTIFICATE          (0x00C0)
+#define MPI26_IOCSTATUS_CANNOT_SEAL_SLOT             (0x00C1)
+#define MPI26_IOCSTATUS_ERROR_SLOT_SEALED            (0x00C2)
 
 /****************************************************************************
 *  IOCStatus flag to indicate that log info is available

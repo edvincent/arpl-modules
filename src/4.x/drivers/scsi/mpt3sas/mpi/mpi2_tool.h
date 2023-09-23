@@ -61,6 +61,7 @@
 #define MPI2_TOOLBOX_DIAGNOSTIC_CLI_TOOL            (0x06)
 #define MPI2_TOOLBOX_TEXT_DISPLAY_TOOL              (0x07)
 #define MPI26_TOOLBOX_BACKEND_PCIE_LANE_MARGIN      (0x08)
+#define MPI26_TOOLBOX_SECURITY_CONTROL_TOOL         (0x09)
 
 
 /****************************************************************************
@@ -473,6 +474,73 @@ typedef struct _MPI26_TOOLBOX_LANE_MARGIN_REPLY
   Mpi26ToolboxLaneMarginingReply_t,
   MPI2_POINTER pMpi26ToolboxLaneMarginingReply_t;
 
+/****************************************************************************
+*  Toolbox Security Control Tool
+****************************************************************************/
+
+#define MPI26_NUM_TOOLINFO                               (4)
+
+/* Toolbox Security Control Tool request message */
+typedef struct _MPI26_TOOLBOX_SEC_CTRL_REQUEST
+{
+    U8                      Tool;                         /* 0x00 */
+    U8                      Reserved1;                    /* 0x01 */
+    U8                      ChainOffset;                  /* 0x02 */
+    U8                      Function;                     /* 0x03 */
+    U16                     Reserved2;                    /* 0x04 */
+    U8                      Reserved3;                    /* 0x06 */
+    U8                      MsgFlags;                     /* 0x07 */
+    U8                      VP_ID;                        /* 0x08 */
+    U8                      VF_ID;                        /* 0x09 */
+    U16                     Reserved4;                    /* 0x0A */
+    U8                      SlotGroupNum;                 /* 0x0C */
+    U8                      SlotNum;                      /* 0x0D */
+    U8                      Action;                       /* 0x0E */
+    U8                      Reserved5;                    /* 0x0F */
+    U32                     ToolInfo[MPI26_NUM_TOOLINFO]; /* 0x10 */
+    U8                      SGL0Offset;                   /* 0x20 */
+    U8                      SGL1Offset;                   /* 0x21 */
+    U16                     Reserved6;                    /* 0x22 */
+    U32                     DataLengthIn;                 /* 0x24 */
+    U32                     DataLengthOut;                /* 0x28 */
+    MPI2_SGE_SIMPLE_UNION   SGL0;                         /* 0x2C */
+    MPI2_SGE_SIMPLE_UNION   SGL1;                         /* 0x3C */
+} MPI26_TOOLBOX_SEC_CTRL_REQUEST, MPI2_POINTER PTR_MPI26_TOOLBOX_SEC_CTRL_REQUEST,
+  Mpi26ToolboxSecCtrlRequest_t, MPI2_POINTER pMpi26ToolboxSecCtrlRequest_t;
+
+/* defines for the Action field */
+#define MPI26_TOOL_SEC_CTRL_ACTION_EXPORT_CSR             (0x01)
+#define MPI26_TOOL_SEC_CTRL_ACTION_IMPORT_CERT_CHAIN      (0x02)
+#define MPI26_TOOL_SEC_CTRL_ACTION_SLOT_MGMT              (0x03)
+
+/* defines for ToolInfo0 when Action=IMPORT_CERT_CHAIN */
+#define MPI26_TOOL_SEC_INFO0_CERT_SEAL                    (0x00000001)
+#define MPI26_TOOL_SEC_INFO0_CERT_NO_SEAL                 (0x00000000)
+
+/* defines for ToolInfo0 when Action=SLOT_MGMT */
+#define MPI26_TOOL_SEC_INFO0_SLOT_ACT_MASK                (0x0000FFFF)
+#define MPI26_TOOL_SEC_INFO0_SLOT_ACT_INVALIDATE          (0x00000001)
+
+
+/* Toolbox Security Control Tool reply message */
+typedef struct _MPI26_TOOLBOX_SECURITY_CONTROL_REPLY
+{
+    U8                      Tool;                         /* 0x00 */
+    U8                      Reserved1;                    /* 0x01 */
+    U8                      MsgLength;                    /* 0x02 */
+    U8                      Function;                     /* 0x03 */
+    U16                     Reserved2;                    /* 0x04 */
+    U8                      Reserved3;                    /* 0x06 */
+    U8                      MsgFlags;                     /* 0x07 */
+    U8                      VP_ID;                        /* 0x08 */
+    U8                      VF_ID;                        /* 0x09 */
+    U16                     Reserved4;                    /* 0x0A */
+    U16                     Reserved5;                    /* 0x0C */
+    U16                     IOCStatus;                    /* 0x0E */
+    U32                     IOCLogInfo;                   /* 0x10 */
+    U32                     ReturnedDataLength;           /* 0x14 */
+} MPI26_TOOLBOX_SECURITY_CONTROL_REPLY, MPI2_POINTER PTR_MPI26_TOOLBOX_SECURITY_CONTROL_REPLY,
+  Mpi26ToolboxSecurityControlReply_t, MPI2_POINTER pMpi26ToolboxSecurityControlReply_t;
 
 /*****************************************************************************
 *

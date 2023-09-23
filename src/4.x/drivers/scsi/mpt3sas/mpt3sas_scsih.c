@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Scsi Host Layer for MPT (Message Passing Technology) based controllers
  *
@@ -4467,6 +4464,7 @@ static struct fw_event_work *dequeue_next_fw_event(struct MPT3SAS_ADAPTER *ioc)
 		fw_event = list_first_entry(&ioc->fw_event_list,
 				struct fw_event_work, list);
 		list_del_init(&fw_event->list);
+		fw_event_work_put(fw_event);
 	}
 	spin_unlock_irqrestore(&ioc->fw_event_lock, flags);
 
@@ -4486,6 +4484,7 @@ static void
 _scsih_fw_event_cleanup_queue(struct MPT3SAS_ADAPTER *ioc)
 {
 	struct fw_event_work *fw_event;
+	bool rc = false;
 
 	if ((list_empty(&ioc->fw_event_list) && !ioc->current_event) ||
 	     !ioc->firmware_event_thread || in_interrupt())
@@ -4551,21 +4550,20 @@ _scsih_fw_event_cleanup_queue(struct MPT3SAS_ADAPTER *ioc)
 #if (LINUX_VERSION_CODE > KERNEL_VERSION(2,6,19))
 		if (fw_event->delayed_work_active)
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,23))
-			cancel_delayed_work_sync(&fw_event->delayed_work);
+			rc = cancel_delayed_work_sync(&fw_event->delayed_work);
 #else
-			cancel_delayed_work(&fw_event->delayed_work);
+			rc = cancel_delayed_work(&fw_event->delayed_work);
 #endif
 		else
-			cancel_work_sync(&fw_event->work);
+			rc = cancel_work_sync(&fw_event->work);
 
-		fw_event_work_put(fw_event);
+		if (rc)
+			fw_event_work_put(fw_event);
 
 #else
-		cancel_delayed_work(&fw_event->work);
-		fw_event_work_put(fw_event);
-
+		if (cancel_delayed_work(&fw_event->work))
+			fw_event_work_put(fw_event);
 #endif
-		fw_event_work_put(fw_event);
 	}
 
 	ioc->fw_events_cleanup = 0;
@@ -6276,11 +6274,11 @@ mpt3sas_scsih_flush_running_cmds(struct MPT3SAS_ADAPTER *ioc)
 
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,23))
 		if (scmd->use_sg) {
-			pci_unmap_sg(ioc->pdev,
+			dma_unmap_sg(&ioc->pdev->dev,
 			    (struct scatterlist *) scmd->request_buffer,
 			    scmd->use_sg, scmd->sc_data_direction);
 		} else if (scmd->request_bufflen) {
-			pci_unmap_single(ioc->pdev,
+			dma_unmap_single(&ioc->pdev->dev,
 			    scmd->SCp.dma_handle, scmd->request_bufflen,
 			    scmd->sc_data_direction);
 		}
@@ -6474,6 +6472,7 @@ _scsih_setup_eedp(struct MPT3SAS_ADAPTER *ioc, struct scsi_cmnd *scmd,
 	if(scsi_host_get_guard(scmd->device->host)  & SHOST_DIX_GUARD_IP)
 		eedp_flags |=	(1<<4);
 	}
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(5,15,0))
 	switch (prot_type) {
 	case SCSI_PROT_DIF_TYPE0:
 		if (ioc->hba_mpi_version_belonged != MPI2_VERSION){
@@ -6513,7 +6512,23 @@ _scsih_setup_eedp(struct MPT3SAS_ADAPTER *ioc, struct scsi_cmnd *scmd,
 			eedp_flags |= MPI25_SCSIIO_EEDPFLAGS_APPTAG_DISABLE_MODE;
 		break;
 	}
+#else
+	if (scmd->prot_flags & SCSI_PROT_GUARD_CHECK)
+		eedp_flags |= MPI2_SCSIIO_EEDPFLAGS_CHECK_GUARD;
 
+	if (scmd->prot_flags & SCSI_PROT_REF_CHECK)
+		eedp_flags |= MPI2_SCSIIO_EEDPFLAGS_CHECK_REFTAG;
+
+	if (scmd->prot_flags & SCSI_PROT_REF_INCREMENT) {
+		eedp_flags |= MPI2_SCSIIO_EEDPFLAGS_INC_PRI_REFTAG;
+
+		mpi_request->CDB.EEDP32.PrimaryReferenceTag =
+		    cpu_to_be32(scsi_prot_ref_tag(scmd));
+	}
+
+	if (ioc->is_gen35_ioc)
+		eedp_flags |= MPI25_SCSIIO_EEDPFLAGS_APPTAG_DISABLE_MODE;
+#endif
 #endif
 	mpi_request->EEDPBlockSize =
 	    cpu_to_le32(scmd->device->sector_size);
@@ -7881,11 +7896,11 @@ _scsih_io_done(struct MPT3SAS_ADAPTER *ioc, u16 smid, u8 msix_index, u32 reply)
 
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,23))
 	if (scmd->use_sg)
-		pci_unmap_sg(ioc->pdev, (struct scatterlist *)
+		dma_unmap_sg(&ioc->pdev->dev, (struct scatterlist *)
 		    scmd->request_buffer, scmd->use_sg,
 		    scmd->sc_data_direction);
 	else if (scmd->request_bufflen)
-		pci_unmap_single(ioc->pdev, scmd->SCp.dma_handle,
+		dma_unmap_single(&ioc->pdev->dev, scmd->SCp.dma_handle,
 		    scmd->request_bufflen, scmd->sc_data_direction);
 #else
 	scsi_dma_unmap(scmd);
@@ -9461,8 +9476,8 @@ _scsih_read_capacity_16(struct MPT3SAS_ADAPTER *ioc, u16 handle, u32 lun,
 		goto out;
 	}
 
-	parameter_data = pci_alloc_consistent(ioc->pdev, data_length,
-		&transfer_packet->data_dma);
+	parameter_data = dma_alloc_coherent(&ioc->pdev->dev, data_length,
+		&transfer_packet->data_dma, GFP_ATOMIC);
 	if (!parameter_data) {
 		printk(MPT3SAS_ERR_FMT "failure at %s:%d/%s()!\n",
 		    ioc->name, __FILE__, __LINE__, __func__);
@@ -9502,7 +9517,7 @@ _scsih_read_capacity_16(struct MPT3SAS_ADAPTER *ioc, u16 handle, u32 lun,
 
  out:
 	if (parameter_data)
-		pci_free_consistent(ioc->pdev, data_length, parameter_data,
+		dma_free_coherent(&ioc->pdev->dev, data_length, parameter_data,
 		    transfer_packet->data_dma);
 	kfree(transfer_packet);
 	return rc;
@@ -9542,8 +9557,8 @@ _scsih_inquiry_vpd_sn(struct MPT3SAS_ADAPTER *ioc, u16 handle,
 	}
 
 	data_length = 252;
-	inq_data = pci_alloc_consistent(ioc->pdev, data_length,
-		&transfer_packet->data_dma);
+	inq_data = dma_alloc_coherent(&ioc->pdev->dev, data_length,
+		&transfer_packet->data_dma, GFP_ATOMIC);
 	if (!inq_data) {
 		printk(MPT3SAS_ERR_FMT "failure at %s:%d/%s()!\n",
 		    ioc->name, __FILE__, __LINE__, __func__);
@@ -9561,7 +9576,7 @@ _scsih_inquiry_vpd_sn(struct MPT3SAS_ADAPTER *ioc, u16 handle,
 	transfer_packet->cdb[1] = 1;
 	transfer_packet->cdb[2] = 0x80;
 	transfer_packet->cdb[4] = data_length;
-	transfer_packet->timeout = 5;
+	transfer_packet->timeout = 30;
 
 	pcie_device = mpt3sas_get_pdev_by_handle(ioc, handle);
 
@@ -9599,7 +9614,7 @@ _scsih_inquiry_vpd_sn(struct MPT3SAS_ADAPTER *ioc, u16 handle,
 	if (pcie_device)
 		pcie_device_put(pcie_device);
 	if (inq_data)
-		pci_free_consistent(ioc->pdev, data_length, inq_data,
+		dma_free_coherent(&ioc->pdev->dev, data_length, inq_data,
 		    transfer_packet->data_dma);
 	kfree(transfer_packet);
 	return rc;
@@ -9633,8 +9648,8 @@ _scsih_inquiry_vpd_supported_pages(struct MPT3SAS_ADAPTER *ioc, u16 handle,
 		goto out;
 	}
 
-	inq_data = pci_alloc_consistent(ioc->pdev, data_length,
-		&transfer_packet->data_dma);
+	inq_data = dma_alloc_coherent(&ioc->pdev->dev, data_length,
+		&transfer_packet->data_dma, GFP_ATOMIC);
 	if (!inq_data) {
 		printk(MPT3SAS_ERR_FMT "failure at %s:%d/%s()!\n",
 		    ioc->name, __FILE__, __LINE__, __func__);
@@ -9652,7 +9667,7 @@ _scsih_inquiry_vpd_supported_pages(struct MPT3SAS_ADAPTER *ioc, u16 handle,
 	transfer_packet->cdb[0] = INQUIRY;
 	transfer_packet->cdb[1] = 1;
 	transfer_packet->cdb[4] = data_length;
-	transfer_packet->timeout = 5;
+	transfer_packet->timeout = 30;
 
 	return_code = _scsi_send_scsi_io(ioc, transfer_packet, 30, 0);
 	switch (return_code) {
@@ -9674,7 +9689,7 @@ _scsih_inquiry_vpd_supported_pages(struct MPT3SAS_ADAPTER *ioc, u16 handle,
 
  out:
 	if (inq_data)
-		pci_free_consistent(ioc->pdev, data_length, inq_data,
+		dma_free_coherent(&ioc->pdev->dev, data_length, inq_data,
 		    transfer_packet->data_dma);
 	kfree(transfer_packet);
 	return rc;
@@ -9713,8 +9728,8 @@ _scsih_report_luns(struct MPT3SAS_ADAPTER *ioc, u16 handle, void *data,
 		goto out;
 	}
 
-	lun_data = pci_alloc_consistent(ioc->pdev, data_length,
-		&transfer_packet->data_dma);
+	lun_data = dma_alloc_coherent(&ioc->pdev->dev, data_length,
+		&transfer_packet->data_dma, GFP_ATOMIC);
 	if (!lun_data) {
 		printk(MPT3SAS_ERR_FMT "failure at %s:%d/%s()!\n",
 		    ioc->name, __FILE__, __LINE__, __func__);
@@ -9736,7 +9751,7 @@ _scsih_report_luns(struct MPT3SAS_ADAPTER *ioc, u16 handle, void *data,
 		transfer_packet->cdb[7] = (data_length >> 16) & 0xFF;
 		transfer_packet->cdb[8] = (data_length >>  8) & 0xFF;
 		transfer_packet->cdb[9] = data_length & 0xFF;
-		transfer_packet->timeout = 5;
+		transfer_packet->timeout = 30;
 		transfer_packet->is_raid = is_pd;
 
 		return_code = _scsi_send_scsi_io(ioc, transfer_packet, tr_timeout, tr_method);
@@ -9763,7 +9778,7 @@ _scsih_report_luns(struct MPT3SAS_ADAPTER *ioc, u16 handle, void *data,
  out:
 
 	if (lun_data)
-		pci_free_consistent(ioc->pdev, data_length, lun_data,
+		dma_free_coherent(&ioc->pdev->dev, data_length, lun_data,
 		    transfer_packet->data_dma);
 	kfree(transfer_packet);
 	
@@ -9803,8 +9818,8 @@ _scsih_issue_logsense(struct MPT3SAS_ADAPTER *ioc, u16 handle, u32 lun)
 
 	/* Allocate 16 byte DMA buffer to recieve the LOG Sense Data*/
 	data_length = 16;
-	log_sense_data = pci_alloc_consistent(ioc->pdev, data_length,
-		&transfer_packet->data_dma);
+	log_sense_data = dma_alloc_coherent(&ioc->pdev->dev, data_length,
+		&transfer_packet->data_dma, GFP_ATOMIC);
 	if (!log_sense_data) {
 		printk(MPT3SAS_ERR_FMT "failure at %s:%d/%s()!\n",
 		    ioc->name, __FILE__, __LINE__, __func__);
@@ -9849,7 +9864,7 @@ _scsih_issue_logsense(struct MPT3SAS_ADAPTER *ioc, u16 handle, u32 lun)
 out:
 	if (transfer_packet) {
 		if (log_sense_data)
-			pci_free_consistent(ioc->pdev, data_length,
+			dma_free_coherent(&ioc->pdev->dev, data_length,
 			    log_sense_data, transfer_packet->data_dma);
 		kfree(transfer_packet);
 	}
@@ -9892,7 +9907,7 @@ _scsih_start_unit(struct MPT3SAS_ADAPTER *ioc, u16 handle, u32 lun, u8 is_pd,
 	transfer_packet->cdb[0] = START_STOP;
 	transfer_packet->cdb[1] = 1;
 	transfer_packet->cdb[4] = 1;
-	transfer_packet->timeout = 15;
+	transfer_packet->timeout = 30;
 	transfer_packet->is_raid = is_pd;
 
 	printk(MPT3SAS_INFO_FMT "START_UNIT: handle(0x%04x), "
@@ -10022,7 +10037,7 @@ _scsih_test_unit_ready(struct MPT3SAS_ADAPTER *ioc, u16 handle, u32 lun,
 	transfer_packet->lun = lun;
 	transfer_packet->cdb_length = 6;
 	transfer_packet->cdb[0] = TEST_UNIT_READY;
-	transfer_packet->timeout = 10;
+	transfer_packet->timeout = 30;
 	transfer_packet->is_raid = is_pd;
 
  sata_init_retry:
@@ -10093,8 +10108,8 @@ _scsih_ata_pass_thru_idd(struct MPT3SAS_ADAPTER *ioc, u16 handle,
 		goto out;
 	}
 	data_length = 512;
-	idd_data = pci_alloc_consistent(ioc->pdev, data_length,
-		&transfer_packet->data_dma);
+	idd_data = dma_alloc_coherent(&ioc->pdev->dev, data_length,
+		&transfer_packet->data_dma, GFP_ATOMIC);
 	if (!idd_data) {
 		printk(MPT3SAS_ERR_FMT "failure at %s:%d/%s()!\n",
 		    ioc->name, __FILE__, __LINE__, __func__);
@@ -10112,7 +10127,7 @@ _scsih_ata_pass_thru_idd(struct MPT3SAS_ADAPTER *ioc, u16 handle,
 	transfer_packet->cdb[2] = 0xd;
 	transfer_packet->cdb[3] = 0x1;
 	transfer_packet->cdb[9] = 0xec;
-	transfer_packet->timeout = 5;
+	transfer_packet->timeout = 30;
 
 	return_code = _scsi_send_scsi_io(ioc, transfer_packet, 30, 0);
 	switch (return_code) {
@@ -10137,7 +10152,7 @@ _scsih_ata_pass_thru_idd(struct MPT3SAS_ADAPTER *ioc, u16 handle,
 
  out:
 	if (idd_data) {
-		pci_free_consistent(ioc->pdev, data_length, idd_data,
+		dma_free_coherent(&ioc->pdev->dev, data_length, idd_data,
 		    transfer_packet->data_dma);
 	}
 	kfree(transfer_packet);
@@ -14664,6 +14679,7 @@ _scsih_expander_node_remove(struct MPT3SAS_ADAPTER *ioc,
 {
 	struct _sas_port *mpt3sas_port, *next;
 	unsigned long flags;
+	int port_id;
 
 	/* remove sibling ports attached to this expander */
 	list_for_each_entry_safe(mpt3sas_port, next,
@@ -14684,13 +14700,14 @@ _scsih_expander_node_remove(struct MPT3SAS_ADAPTER *ioc,
 			    mpt3sas_port->hba_port);
 	}
 
+	port_id = sas_expander->port->port_id;
 	mpt3sas_transport_port_remove(ioc, sas_expander->sas_address,
 	    sas_expander->sas_address_parent, sas_expander->port);
 
 	printk(MPT3SAS_INFO_FMT "expander_remove: handle"
 	   "(0x%04x), sas_addr(0x%016llx), port:%d\n", ioc->name,
 	    sas_expander->handle, (unsigned long long)
-	    sas_expander->sas_address, sas_expander->port->port_id);
+	    sas_expander->sas_address, port_id);
 
 	spin_lock_irqsave(&ioc->sas_node_lock, flags);
 	list_del(&sas_expander->list);
@@ -15622,7 +15639,7 @@ out:
 #endif
 
 #if defined(HOST_TAGSET_SUPPORT)
-static int scsih_map_queues(struct Scsi_Host *shost)
+SCSIH_MAP_QUEUE(struct Scsi_Host *shost)
 {
 	struct MPT3SAS_ADAPTER *ioc =
 	    (struct MPT3SAS_ADAPTER *)shost->hostdata;
@@ -15633,14 +15650,15 @@ static int scsih_map_queues(struct Scsi_Host *shost)
 	int iopoll_q_count = ioc->reply_queue_count - nr_msix_vectors;
 
 	if (shost->nr_hw_queues == 1)
-		return 0;
+		MPT3SAS_RETURN;
+
 
 	for (i = 0, qoff = 0; i < shost->nr_maps; i++) {
 		map = &shost->tag_set.map[i];
 		map->nr_queues  = 0;
 		offset = 0;
 		if (i == HCTX_TYPE_DEFAULT) {
-			map->nr_queues = nr_msix_vectors;
+			map->nr_queues = nr_msix_vectors - ioc->high_iops_queues;
 			offset = ioc->high_iops_queues;
 		} else if (i == HCTX_TYPE_POLL)
 			map->nr_queues = iopoll_q_count;
@@ -15660,10 +15678,11 @@ static int scsih_map_queues(struct Scsi_Host *shost)
 
 		qoff += map->nr_queues;
 	}
-	return 0;
+	MPT3SAS_RETURN;
+
 #else
 	if (shost->nr_hw_queues == 1)
-		return 0;
+		MPT3SAS_RETURN;
 
 	return blk_mq_pci_map_queues(&shost->tag_set.map[HCTX_TYPE_DEFAULT],
 	    ioc->pdev, ioc->high_iops_queues);
@@ -15718,9 +15737,6 @@ static struct scsi_host_template mpt2sas_driver_template = {
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3,19,0))
 	.track_queue_depth              = 1,
 #endif
-#if defined(MY_ABC_HERE)
-	.syno_port_type			= SYNO_PORT_TYPE_SAS,
-#endif /* MY_ABC_HERE */
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3,16,0))
 	.cmd_size           = sizeof(struct scsiio_tracker),
 #endif
@@ -15769,7 +15785,7 @@ static struct scsi_host_template mpt3sas_driver_template = {
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(5,3,0))
 	.max_segment_size		= 0xffffffff,
 #endif
-	.cmd_per_lun                    = 7,
+	.cmd_per_lun                    = MPT3SAS_CMD_PER_LUN,
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(5,0,0))
 	.use_clustering                 = ENABLE_CLUSTERING,
 #endif
@@ -16098,6 +16114,7 @@ _scsih_probe(struct pci_dev *pdev, const struct pci_device_id *id)
 
 	/* misc semaphores and spin locks */
 	mutex_init(&ioc->reset_in_progress_mutex);
+	mutex_init(&ioc->hostdiag_unlock_mutex);
 	/* initializing pci_access_mutex lock */
 	mutex_init(&ioc->pci_access_mutex);
 	spin_lock_init(&ioc->ioc_reset_in_progress_lock);
@@ -16313,6 +16330,8 @@ _scsih_probe(struct pci_dev *pdev, const struct pci_device_id *id)
 #if defined(IO_URING_SUPPORT)
 		if (iopoll_q_count)
 			shost->nr_maps = 3;
+		else
+			shost->nr_maps = 1;
 #endif
 
 		dev_info(&ioc->pdev->dev,
@@ -16616,8 +16635,9 @@ scsih_pci_mmio_enabled(struct pci_dev *pdev)
  */
 u8 mpt3sas_scsih_ncq_prio_supp(struct scsi_device *sdev)
 {
-	unsigned char *buf;
 	u8 ncq_prio_supp = 0;
+#if (LINUX_VERSION_CODE <= KERNEL_VERSION(5,18,0))
+	unsigned char *buf;
 
 	if (!scsi_device_supports_vpd(sdev))
 		return ncq_prio_supp;
@@ -16630,6 +16650,18 @@ u8 mpt3sas_scsih_ncq_prio_supp(struct scsi_device *sdev)
 		ncq_prio_supp = (buf[213] >> 4) & 1;
 
 	kfree(buf);
+#else
+	struct scsi_vpd *vpd;
+
+	rcu_read_lock();
+	vpd = rcu_dereference(sdev->vpd_pg89);
+	if (!vpd || vpd->len < 214)
+		goto out;
+
+	ncq_prio_supp = (vpd->data[213] >> 4) & 1;
+out:
+	rcu_read_unlock();
+#endif
 	return ncq_prio_supp;
 }
 #endif
@@ -17009,3 +17041,4 @@ _mpt3sas_exit(void)
 
 module_init(_mpt3sas_init);
 module_exit(_mpt3sas_exit);
+

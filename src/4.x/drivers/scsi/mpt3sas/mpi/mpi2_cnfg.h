@@ -343,6 +343,7 @@ typedef union _MPI2_CONFIG_EXT_PAGE_HEADER_UNION
 #define MPI2_CONFIG_EXTPAGETYPE_PCIE_SWITCH         (0x1C) /* MPI v2.6 and later */
 #define MPI2_CONFIG_EXTPAGETYPE_PCIE_DEVICE         (0x1D) /* MPI v2.6 and later */
 #define MPI2_CONFIG_EXTPAGETYPE_PCIE_LINK           (0x1E) /* MPI v2.6 and later */
+#define MPI2_CONFIG_EXTPAGETYPE_SECURITY            (0x1F) /* MPI v2.6 and later */
 /*  Product specific reserved values  0xE0 - 0xEF */
 /*  Vendor specific reserved values   0xF0 - 0xFF */
 
@@ -467,8 +468,17 @@ typedef union _MPI2_CONFIG_EXT_PAGE_HEADER_UNION
 #define MPI26_PCIE_LINK_PGAD_FORM_GET_NEXT_LINK   (0x00000000)
 #define MPI26_PCIE_LINK_PGAD_FORM_LINK_NUM        (0x10000000)
 
-#define MPI26_PCIE_DEVICE_PGAD_LINKNUM_MASK       (0x000000FF)
+#define MPI26_PCIE_LINK_PGAD_LINKNUM_MASK         (0x000000FF)
 
+/* Security PageAddress Format */
+#define MPI26_SECURITY_PGAD_FORM_MASK             (0xF0000000)
+#define MPI26_SECURITY_PGAD_FORM_GET_NEXT_SLOT    (0x00000000)
+#define MPI26_SECURITY_PGAD_FORM_SLOT_NUM         (0x10000000)
+
+#define MPI26_SECUITY_PGAD_SLOT_GROUP_MASK        (0x0000FF00)
+#define MPI26_SECUITY_PGAD_SLOT_GROUP_SHIFT       (8)
+#define MPI26_SECUITY_PGAD_SLOT_MASK              (0x000000FF)
+#define MPI26_SECUITY_PGAD_SLOT_SHIFT             (0)
 
 
 /****************************************************************************
@@ -1365,6 +1375,28 @@ typedef struct _MPI26_CONFIG_PAGE_IO_UNIT_11
 /* defines for PHY field */
 #define MPI26_IOUNITPAGE11_PHY_SPINUP_GROUP_MASK        (0x03)
 
+
+
+/* IO Unit Page 11 (for MPI v2.6 and later) */
+
+typedef struct _MPI26_CONFIG_PAGE_IO_UNIT_12
+{
+    MPI2_CONFIG_PAGE_HEADER         Header;                         /* 0x00 */
+    U8                              TotalKeySlots;                  /* 0x04 */
+    U8                              KeySlotsAvailable;              /* 0x05 */
+    U16                             Reserved1;                      /* 0x06 */
+    U32                             Flags;                          /* 0x08 */
+} MPI26_CONFIG_PAGE_IO_UNIT_12,
+  MPI2_POINTER PTR_MPI26_CONFIG_PAGE_IO_UNIT_12,
+  Mpi26IOUnitPage12_t, MPI2_POINTER pMpi26IOUnitPage12_t;
+
+
+/* defines for Flags field */
+#define MPI26_IOUNIT12_FLAGS_SEC_BOOT_ENABLED           (0x01)
+#define MPI26_IOUNIT12_FLAGS_SEC_MODE_MASK              (0x06)
+#define MPI26_IOUNIT12_FLAGS_SEC_MODE_SOFT              (0x02)
+#define MPI26_IOUNIT12_FLAGS_SEC_MODE_HARD              (0x04)
+#define MPI26_IOUNIT12_FLAGS_KEY_CHANGE_PENDING         (0x08)
 
 
 /****************************************************************************
@@ -3491,7 +3523,9 @@ typedef struct _MPI26_PCIE_IO_UNIT0_PHY_DATA
 typedef struct _MPI26_CONFIG_PAGE_PIOUNIT_0
 {
     MPI2_CONFIG_EXTENDED_PAGE_HEADER    Header;                                 /* 0x00 */
-    U32                                 Reserved1;                              /* 0x08 */
+    U16                                 Reserved1;                              /* 0x08 */
+    U8                                  ASPMConfiguration;                      /* 0x0A */
+    U8                                  Reserved2;                              /* 0x0B */
     U8                                  NumPhys;                                /* 0x0C */
     U8                                  InitStatus;                             /* 0x0D */
     U16                                 Reserved3;                              /* 0x0E */
@@ -3501,6 +3535,44 @@ typedef struct _MPI26_CONFIG_PAGE_PIOUNIT_0
   Mpi26PCIeIOUnitPage0_t, MPI2_POINTER pMpi26PCIeIOUnitPage0_t;
 
 #define MPI26_PCIEIOUNITPAGE0_PAGEVERSION                   (0x00)
+
+/* values for use if _SHIFT is used to access ASPM fields */
+#define MPI26_ASPM_NONE                                     (0x00)
+#define MPI26_ASPM_L0                                       (0x01)
+#define MPI26_ASPM_L1                                       (0x02)
+#define MPI26_ASPM_L0_L1                                    (0x03)
+
+/* values for PCIe IO Unit Page 0 ASPMConfiguration - Switch Attached links Status*/
+#define MPI26_PCIEIOUNIT0_ASPM_SWSTAT_MASK                  (0xC0)
+#define MPI26_PCIEIOUNIT0_ASPM_SWSTAT_SHIFT                 (6)
+#define MPI26_PCIEIOUNIT0_ASPM_SWSTAT_DISABLED              (0x00)
+#define MPI26_PCIEIOUNIT0_ASPM_SWSTAT_L0                    (0x40)
+#define MPI26_PCIEIOUNIT0_ASPM_SWSTAT_L1                    (0x80)
+#define MPI26_PCIEIOUNIT0_ASPM_SWSTAT_L0_L1                 (0xC0)
+
+/* values for PCIe IO Unit Page 0 ASPMConfiguration - Direct Attached links Status*/
+#define MPI26_PCIEIOUNIT0_ASPM_DASTAT_MASK                  (0x30)
+#define MPI26_PCIEIOUNIT0_ASPM_DASTAT_SHIFT                 (4)
+#define MPI26_PCIEIOUNIT0_ASPM_DASTAT_DISABLED              (0x00)
+#define MPI26_PCIEIOUNIT0_ASPM_DASTAT_L0                    (0x10)
+#define MPI26_PCIEIOUNIT0_ASPM_DASTAT_L1                    (0x20)
+#define MPI26_PCIEIOUNIT0_ASPM_DASTAT_L0_L1                 (0x30)
+
+/* values for PCIe IO Unit Page 0 ASPMConfiguration - Switch Attached links Support*/
+#define MPI26_PCIEIOUNIT0_ASPM_SWSUP_MASK                   (0x0C)
+#define MPI26_PCIEIOUNIT0_ASPM_SWSUP_SHIFT                  (2)
+#define MPI26_PCIEIOUNIT0_ASPM_SWSUP_NONE                   (0x00)
+#define MPI26_PCIEIOUNIT0_ASPM_SWSUP_L0                     (0x04)
+#define MPI26_PCIEIOUNIT0_ASPM_SWSUP_L1                     (0x08)
+#define MPI26_PCIEIOUNIT0_ASPM_SWSUP_L0_L1                  (0x0C)
+
+/* values for PCIe IO Unit Page 0 ASPMConfiguration - Direct Attached links Support*/
+#define MPI26_PCIEIOUNIT0_ASPM_DASUP_MASK                   (0x03)
+#define MPI26_PCIEIOUNIT0_ASPM_DASUP_SHIFT                  (0)
+#define MPI26_PCIEIOUNIT0_ASPM_DASUP_NONE                   (0x00)
+#define MPI26_PCIEIOUNIT0_ASPM_DASUP_L0                     (0x01)
+#define MPI26_PCIEIOUNIT0_ASPM_DASUP_L1                     (0x02)
+#define MPI26_PCIEIOUNIT0_ASPM_DASUP_L0_L1                  (0x03)
 
 /* values for PCIe IO Unit Page 0 LinkFlags */
 #define MPI26_PCIEIOUNIT0_LF_ENUMERATION_IN_PROGRESS        (0x08)
@@ -3550,7 +3622,8 @@ typedef struct _MPI26_CONFIG_PAGE_PIOUNIT_1
 {
     MPI2_CONFIG_EXTENDED_PAGE_HEADER    Header;                             /* 0x00 */
     U16                                 ControlFlags;                       /* 0x08 */
-    U16                                 Reserved;                           /* 0x0A */
+    U8                                  ASPMSettings;                       /* 0x0A */
+    U8                                  Reserved;                           /* 0x0B */
     U16                                 AdditionalControlFlags;             /* 0x0C */
     U16                                 NVMeMaxQueueDepth;                  /* 0x0E */
     U8                                  NumPhys;                            /* 0x10 */
@@ -3577,6 +3650,23 @@ typedef struct _MPI26_CONFIG_PAGE_PIOUNIT_1
 #define MPI26_PCIEIOUNIT1_CF_BP_RATE_8_0_MAX                        (0x0004)
 #define MPI26_PCIEIOUNIT1_CF_BP_RATE_16_0_MAX                       (0x0005)
 
+/* values for PCIe IO Unit Page 1 ASPMSettings - Switch Attached links */
+/*  NOTE: if using _SHIFT to access field, use MPI26_ASPM_ defines   */
+#define MPI26_PCIEIOUNIT1_ASPM_SW_MASK                              (0x000C)
+#define MPI26_PCIEIOUNIT1_ASPM_SW_SHIFT                             (2)
+#define MPI26_PCIEIOUNIT1_ASPM_SW_DISABLED                          (0x0000)
+#define MPI26_PCIEIOUNIT1_ASPM_SW_L0                                (0x0004)
+#define MPI26_PCIEIOUNIT1_ASPM_SW_L1                                (0x0008)
+#define MPI26_PCIEIOUNIT1_ASPM_SW_L0_L1                             (0x000C)
+
+/* values for PCIe IO Unit Page 1 ASPMSettings - Direct Attached links */
+/*  NOTE: if using _SHIFT to access field, use MPI26_ASPM_ defines   */
+#define MPI26_PCIEIOUNIT1_ASPM_DA_MASK                              (0x0003)
+#define MPI26_PCIEIOUNIT1_ASPM_DA_SHIFT                             (0)
+#define MPI26_PCIEIOUNIT1_ASPM_DA_DISABLED                          (0x0000)
+#define MPI26_PCIEIOUNIT1_ASPM_DA_L0                                (0x0001)
+#define MPI26_PCIEIOUNIT1_ASPM_DA_L1                                (0x0002)
+#define MPI26_PCIEIOUNIT1_ASPM_DA_L0_L1                             (0x0003)
 
 /* values for PCIe IO Unit Page 1 PhyFlags */
 #define MPI26_PCIEIOUNIT1_PHYFLAGS_PHY_DISABLE                      (0x08)
@@ -3651,6 +3741,16 @@ typedef struct _MPI26_CONFIG_PAGE_PSWITCH_1
 /* use MPI26_PCIE_NEG_LINK_RATE_ defines for the NegotiatedLinkRate field */
 
 /* defines for the Flags field */
+#define MPI26_PCIESWITCH1_ASPM_STATE_MASK            (0x0030)
+#define MPI26_PCIESWITCH1_ASPM_STATE_DISABLED        (0x0000)
+#define MPI26_PCIESWITCH1_ASPM_STATE_L0              (0x0010)
+#define MPI26_PCIESWITCH1_ASPM_STATE_L1              (0x0020)
+#define MPI26_PCIESWITCH1_ASPM_STATE_L0_L1           (0x0030)
+#define MPI26_PCIESWITCH1_ASPM_CAP_MASK              (0x000C)
+#define MPI26_PCIESWITCH1_ASPM_CAP_NONE              (0x0000)
+#define MPI26_PCIESWITCH1_ASPM_CAP_L0                (0x0004)
+#define MPI26_PCIESWITCH1_ASPM_CAP_L1                (0x0008)
+#define MPI26_PCIESWITCH1_ASPM_CAP_L0_L1             (0x000C)
 #define MPI26_PCIESWITCH1_2_RETIMER_PRESENCE         (0x0002)
 #define MPI26_PCIESWITCH1_RETIMER_PRESENCE           (0x0001)
 
@@ -3673,7 +3773,7 @@ typedef struct _MPI26_CONFIG_PAGE_PCIEDEV_0
     U8                                  AccessStatus;           /* 0x17 */
     U16                                 DevHandle;              /* 0x18 */
     U8                                  PhysicalPort;           /* 0x1A */
-    U8                                  Reserved1;              /* 0x1B */
+    U8                                  NVMInitFailureInfo;     /* 0x1B */
     U32                                 DeviceInfo;             /* 0x1C */
     U32                                 Flags;                  /* 0x20 */
     U8                                  SupportedLinkRates;     /* 0x24 */
@@ -3716,6 +3816,16 @@ typedef struct _MPI26_CONFIG_PAGE_PCIEDEV_0
 /* see mpi2_pci.h for the MPI26_PCIE_DEVINFO_ defines used for the DeviceInfo field */
 
 /* values for PCIe Device Page 0 Flags field */
+#define MPI26_PCIEDEV0_FLAGS_ASPM_ST_MASK                   (0x00300000)
+#define MPI26_PCIEDEV0_FLAGS_ASPM_ST_DISABLED               (0x00000000)
+#define MPI26_PCIEDEV0_FLAGS_ASPM_ST_L0                     (0x00100000)
+#define MPI26_PCIEDEV0_FLAGS_ASPM_ST_L1                     (0x00200000)
+#define MPI26_PCIEDEV0_FLAGS_ASPM_ST_L0_L1                  (0x00300000)
+#define MPI26_PCIEDEV0_FLAGS_ASPM_CAP_MASK                  (0x000C0000)
+#define MPI26_PCIEDEV0_FLAGS_ASPM_CAP_NONE                  (0x00000000)
+#define MPI26_PCIEDEV0_FLAGS_ASPM_CAP_L0                    (0x00040000)
+#define MPI26_PCIEDEV0_FLAGS_ASPM_CAP_L1                    (0x00080000)
+#define MPI26_PCIEDEV0_FLAGS_ASPM_CAP_L0_L1                 (0x000C0000)
 #define MPI26_PCIEDEV0_FLAGS_2_RETIMER_PRESENCE             (0x00020000)
 #define MPI26_PCIEDEV0_FLAGS_RETIMER_PRESENCE               (0x00010000)
 #define MPI26_PCIEDEV0_FLAGS_UNAUTHORIZED_DEVICE            (0x00008000)
@@ -3908,6 +4018,94 @@ typedef struct _MPI26_CONFIG_PAGE_PCIELINK_3
 
 #define MPI26_PCIELINK3_PAGEVERSION            (0x00)
 
+
+
+/****************************************************************************
+*   Security Config Pages (MPI v2.6 and later)
+****************************************************************************/
+
+#define MPI26_SEC_MAC_LEN                     (16)
+#define MPI26_SEC_NONCE_LEN                   (16)
+#define MPI26_SEC_CERT_CHAIN_LEN              (1024)
+#define MPI26_SEC_KEYDATA_LEN                 (128)
+
+/* Security Page 0 */
+
+typedef struct _MPI26_CONFIG_PAGE_SECURITY_0
+{
+    MPI2_CONFIG_EXTENDED_PAGE_HEADER    Header;                              /* 0x00 */
+    U8                                  SlotGroupNum;                        /* 0x08 */
+    U8                                  SlotNum;                             /* 0x09 */
+    U16                                 CertChainLength;                     /* 0x0A */
+    U8                                  CertChainFlags;                      /* 0x0C */
+    U8                                  Reserved1[3];                        /* 0x0D */
+    U32                                 BaseAsymAlgo;                        /* 0x10 */
+    U32                                 BaseHashAlgo;                        /* 0x14 */
+    U32                                 Reserved2[4];                        /* 0x18 */
+    U32                                 MAC[MPI26_SEC_MAC_LEN];              /* 0x28 */
+    U32                                 Nonce[MPI26_SEC_NONCE_LEN];          /* 0x68*/
+    U32                                 CertChain[MPI26_SEC_CERT_CHAIN_LEN]; /* 0xA8*/
+} MPI26_CONFIG_PAGE_SECURITY_0, MPI2_POINTER PTR_MPI26_CONFIG_PAGE_SECURITY_0,
+  Mpi26SecurityPage0_t, MPI2_POINTER pMpi26SecurityPage0_t;
+
+#define MPI26_SECURITY0_PAGEVERSION           (0x01)
+
+/* defines for the CertChainFlags field */
+#define MPI26_SEC0_CERT_FLAGS_AUTH_MASK       (0x0E)
+#define MPI26_SEC0_CERT_FLAGS_AUTH_UNUSED     (0x00)
+#define MPI26_SEC0_CERT_FLAGS_AUTH_CERBERUS   (0x02)
+#define MPI26_SEC0_CERT_FLAGS_AUTH_SPDM       (0x04)
+#define MPI26_SEC0_CERT_FLAGS_SEALED          (0x01)
+
+/* Security Page 1 */
+
+typedef struct _MPI26_SEC1_KEY_RECORD
+{
+    U8                                  Flags;                               /* 0x00 */
+    U8                                  Consimer;                            /* 0x01 */
+    U16                                 KeyDataSize;                         /* 0x02 */
+    U32                                 AdditionalKeyData;                   /* 0x04 */
+    U32                                 Reserved1[2];                        /* 0x08 */
+    U32                                 KeyData[MPI26_SEC_KEYDATA_LEN];      /* 0x10 */
+} MPI26_SEC1_KEY_RECORD, MPI2_POINTER PTR_MPI26_SEC1_KEY_RECORD,
+  Mpi26Sec1KeyRecord_t, MPI2_POINTER pMpi26Sec1KeyRecord_t;
+
+/* defines for the Consumer field */
+#define MPI26_SEC1_KEYREC_CONSUMER_NOT_VALID        (0x00)
+#define MPI26_SEC1_KEYREC_CONSUMER_SAFESTORE        (0x01)
+#define MPI26_SEC1_KEYREC_CONSUMER_CERT_CHAIN_AUTH  (0x02)
+#define MPI26_SEC1_KEYREC_CONSUMER_DEVICEKEY        (0x00)
+
+/* defined for the Flags field */
+#define MPI26_SEC1_KEYREC_FLAGS_TYPE_MASK           (0x1F)
+#define MPI26_SEC1_KEYREC_FLAGS_TYPE_NOT_VALID      (0x00)
+#define MPI26_SEC1_KEYREC_FLAGS_TYPE_HMAC           (0x01)
+#define MPI26_SEC1_KEYREC_FLAGS_TYPE_AES            (0x02)
+#define MPI26_SEC1_KEYREC_FLAGS_TYPE_PRIV_ECDSA     (0x03)
+#define MPI26_SEC1_KEYREC_FLAGS_TYPE_PUB_ECDSA      (0x04)
+
+#ifndef MPI26_SEC1_NUM_KEY_REC
+#define MPI26_SEC1_NUM_KEY_REC        (1)
+#endif
+
+#ifndef MPI26_SEC1_NUM_PAD
+#define MPI26_SEC1_NUM_PAD            (1)
+#endif
+
+typedef struct _MPI26_CONFIG_PAGE_SECURITY_1
+{
+    MPI2_CONFIG_EXTENDED_PAGE_HEADER    Header;                              /* 0x00 */
+    U32                                 MAC[MPI26_SEC_MAC_LEN];              /* 0x08 */
+    U8                                  NumKeys;                             /* 0x48 */
+    U8                                  Reserved1[3];                        /* 0x49 */
+    U32                                 Reserved2[5];                        /* 0x4C */
+    U32                                 Nonce[MPI26_SEC_NONCE_LEN];          /* 0x60 */
+    MPI26_SEC1_KEY_RECORD               KeyRecord[MPI26_SEC1_NUM_KEY_REC];   /* 0xA0 */
+    U32                                 Pad[MPI26_SEC1_NUM_PAD];             /* ??   */
+} MPI26_CONFIG_PAGE_SECURITY_1, MPI2_POINTER PTR_MPI26_CONFIG_PAGE_SECURITY_1,
+  Mpi26SecurityPage1_t, MPI2_POINTER pMpi26SecurityPage1_t;
+
+#define MPI26_SECURITY1_PAGEVERSION           (0x01)
 
 #endif
 

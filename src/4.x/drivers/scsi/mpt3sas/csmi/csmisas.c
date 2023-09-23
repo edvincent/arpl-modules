@@ -1755,8 +1755,8 @@ _csmisas_smp_passthru(struct MPT3SAS_ADAPTER *ioc,
 
 	/* Allocate DMA memory. Use a single buffer for both request and
 	 * response data. */
-	data_addr = pci_alloc_consistent(ioc->pdev, data_out_sz + data_in_sz,
-					 &data_dma);
+	data_addr = dma_alloc_coherent(&ioc->pdev->dev, data_out_sz + data_in_sz,
+					 &data_dma, GFP_ATOMIC);
 	if (!data_addr) {
 		printk(MPT3SAS_ERR_FMT "%s():%d: data addr = NULL\n",
 		       ioc->name, __func__, __LINE__);
@@ -1869,7 +1869,7 @@ _csmisas_smp_passthru(struct MPT3SAS_ADAPTER *ioc,
 	karg->IoctlHeader.ReturnCode = CSMI_SAS_STATUS_SUCCESS;
 
 pci_free:
-	pci_free_consistent(ioc->pdev, data_out_sz + data_in_sz, data_addr,
+	dma_free_coherent(&ioc->pdev->dev, data_out_sz + data_in_sz, data_addr,
 	    data_dma);
 cmd_not_used:
 	ioc->transport_cmds.status = MPT3_CMD_NOT_USED;
@@ -2014,7 +2014,7 @@ _csmisas_ssp_passthru(struct MPT3SAS_ADAPTER *ioc,
 	 * to the DMA buffer */
 	data_sz = karg->Parameters.uDataLength;
 	if (data_sz) {
-		data_addr = pci_alloc_consistent(ioc->pdev, data_sz, &data_dma);
+		data_addr = dma_alloc_coherent(&ioc->pdev->dev, data_sz, &data_dma, GFP_ATOMIC);
 		if (!data_addr) {
 			printk(MPT3SAS_ERR_FMT "%s():%d: data addr = NULL\n",
 			    ioc->name, __func__, __LINE__);
@@ -2207,7 +2207,7 @@ _csmisas_ssp_passthru(struct MPT3SAS_ADAPTER *ioc,
 		}
 		karg->Status.bSSPStatus = CSMI_SAS_SSP_STATUS_RETRY;
 	}
-	pci_free_consistent(ioc->pdev, data_sz, data_addr, data_dma);
+	dma_free_coherent(&ioc->pdev->dev, data_sz, data_addr, data_dma);
  set_cmd_status:
 	ioc->scsih_cmds.status = MPT3_CMD_NOT_USED;
  unlock:
@@ -2353,11 +2353,11 @@ _csmisas_stp_passthru(struct MPT3SAS_ADAPTER *ioc,
 
 	sgl_flags |= data_sz;
 	if (data_sz > 0) {
-		data_addr = pci_alloc_consistent(ioc->pdev, data_sz, &data_dma);
+		data_addr = dma_alloc_coherent(&ioc->pdev->dev, data_sz, &data_dma, GFP_ATOMIC);
 
 		if (data_addr == NULL) {
 			dcsmisasprintk(ioc, printk(KERN_ERR
-			    ": pci_alloc_consistent: FAILED\n"));
+			    ": dma_alloc_coherent: FAILED\n"));
 			karg->IoctlHeader.ReturnCode = CSMI_SAS_STATUS_FAILED;
 			mpt3sas_base_free_smid(ioc, smid);
 			goto set_cmd_status;
@@ -2423,7 +2423,7 @@ _csmisas_stp_passthru(struct MPT3SAS_ADAPTER *ioc,
 	}
 
 	if (data_addr)
-		pci_free_consistent(ioc->pdev, data_sz, (u8 *)data_addr,
+		dma_free_coherent(&ioc->pdev->dev, data_sz, (u8 *)data_addr,
 		    data_dma);
 
 	/* Success */

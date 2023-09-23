@@ -343,8 +343,8 @@ _ctl_do_fw_download(struct MPT3SAS_ADAPTER *ioc, char *fwbuf, size_t fwlen)
 
 	/* obtain dma-able memory for data transfer */
 	if (!data_out) {
-		data_out = pci_alloc_consistent(ioc->pdev, data_out_sz,
-		    &data_out_dma);
+		data_out = dma_alloc_coherent(&ioc->pdev->dev, data_out_sz,
+		    &data_out_dma, GFP_ATOMIC);
 	}
 	if (!data_out) {
 		printk(KERN_ERR "failure at %s:%d/%s()!\n", __FILE__,
@@ -401,7 +401,7 @@ _ctl_do_fw_download(struct MPT3SAS_ADAPTER *ioc, char *fwbuf, size_t fwlen)
 
 	/* free memory associated with sg buffers */
 	if (data_out) {
-		pci_free_consistent(ioc->pdev, data_out_sz, data_out,
+		dma_free_coherent(&ioc->pdev->dev, data_out_sz, data_out,
 		    data_out_dma);
 		data_out = NULL;
 	}

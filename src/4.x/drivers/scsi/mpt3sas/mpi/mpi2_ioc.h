@@ -368,6 +368,7 @@ typedef struct _MPI2_IOC_FACTS_REPLY
 #define MPI2_IOCFACTS_HDRVERSION_DEV_SHIFT              (0)
 
 /* IOCExceptions */
+#define MPI26_IOCFACTS_EXCEPT_PACKAGE_STAMP_FAIL        (0x0800)
 #define MPI2_IOCFACTS_EXCEPT_PCIE_DISABLED              (0x0400)
 #define MPI2_IOCFACTS_EXCEPT_PARTIAL_MEMORY_FAILURE     (0x0200)
 #define MPI2_IOCFACTS_EXCEPT_IR_FOREIGN_CONFIG_MAX      (0x0100)
@@ -389,6 +390,7 @@ typedef struct _MPI2_IOC_FACTS_REPLY
 /* ProductID field uses MPI2_FW_HEADER_PID_ */
 
 /* IOCCapabilities */
+#define MPI26_IOCFACTS_CAPABILITY_AUTH_ENCRYPT          (0x00400000)
 #define MPI26_IOCFACTS_CAPABILITY_COREDUMP_ENABLED      (0x00200000)
 #define MPI26_IOCFACTS_CAPABILITY_PCIE_SRIOV            (0x00100000)
 #define MPI26_IOCFACTS_CAPABILITY_ATOMIC_REQ            (0x00080000)
@@ -1814,7 +1816,7 @@ typedef struct _MPI26_IOUNIT_CONTROL_REQUEST
     U16                     SlotNumber;         /* 0x16 */
     U64                     LookupAddress;      /* 0x18 */
     U32                     IOCParameterValue;  /* 0x20 */
-    U32                     Reserved7;          /* 0x24 */
+    U32                     IOCParameterValue2; /* 0x24 */
     U32                     Reserved8;          /* 0x28 */
 } MPI26_IOUNIT_CONTROL_REQUEST,
   MPI2_POINTER PTR_MPI26_IOUNIT_CONTROL_REQUEST,

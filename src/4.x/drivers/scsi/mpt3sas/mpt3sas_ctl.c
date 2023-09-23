@@ -811,8 +811,8 @@ _ctl_do_mpt_command(struct MPT3SAS_ADAPTER *ioc, struct mpt3_ioctl_command karg,
 
 	/* obtain dma-able memory for data transfer */
 	if (data_out_sz) /* WRITE */ {
-		data_out = pci_alloc_consistent(ioc->pdev, data_out_sz,
-		    &data_out_dma);
+		data_out = dma_alloc_coherent(&ioc->pdev->dev, data_out_sz,
+		    &data_out_dma, GFP_ATOMIC);
 		if (!data_out) {
 			printk(KERN_ERR "failure at %s:%d/%s()!\n", __FILE__,
 			    __LINE__, __func__);
@@ -831,8 +831,8 @@ _ctl_do_mpt_command(struct MPT3SAS_ADAPTER *ioc, struct mpt3_ioctl_command karg,
 	}
 
 	if (data_in_sz) /* READ */ {
-		data_in = pci_alloc_consistent(ioc->pdev, data_in_sz,
-		    &data_in_dma);
+		data_in = dma_alloc_coherent(&ioc->pdev->dev, data_in_sz,
+		    &data_in_dma, GFP_ATOMIC);
 		if (!data_in) {
 			printk(KERN_ERR "failure at %s:%d/%s()!\n", __FILE__,
 			    __LINE__, __func__);
@@ -1202,11 +1202,11 @@ _ctl_do_mpt_command(struct MPT3SAS_ADAPTER *ioc, struct mpt3_ioctl_command karg,
 
 	/* free memory associated with sg buffers */
 	if (data_in)
-		pci_free_consistent(ioc->pdev, data_in_sz, data_in,
+		dma_free_coherent(&ioc->pdev->dev, data_in_sz, data_in,
 		    data_in_dma);
 
 	if (data_out)
-		pci_free_consistent(ioc->pdev, data_out_sz, data_out,
+		dma_free_coherent(&ioc->pdev->dev, data_out_sz, data_out,
 		    data_out_dma);
 
 	kfree(mpi_request);
@@ -1791,6 +1791,7 @@ _ctl_diag_register_2(struct MPT3SAS_ADAPTER *ioc,
 	ioc->ctl_diag_cmds.status = MPT3_CMD_PENDING;
 	memset(ioc->ctl_diag_cmds.reply, 0, ioc->reply_sz);
 	mpi_request = mpt3sas_base_get_msg_frame(ioc, smid);
+	memset(mpi_request, 0, ioc->request_sz);
 	ioc->ctl_diag_cmds.smid = smid;
 
 	request_data = ioc->diag_buffer[buffer_type];
@@ -1807,7 +1808,7 @@ _ctl_diag_register_2(struct MPT3SAS_ADAPTER *ioc,
 	if (request_data) {
 		request_data_dma = ioc->diag_buffer_dma[buffer_type];
 		if (request_data_sz != ioc->diag_buffer_sz[buffer_type]) {
-			pci_free_consistent(ioc->pdev,
+			dma_free_coherent(&ioc->pdev->dev,
 			    ioc->diag_buffer_sz[buffer_type],
 			    request_data, request_data_dma);
 			request_data = NULL;
@@ -1817,8 +1818,8 @@ _ctl_diag_register_2(struct MPT3SAS_ADAPTER *ioc,
 	if (request_data == NULL) {
 		ioc->diag_buffer_sz[buffer_type] = 0;
 		ioc->diag_buffer_dma[buffer_type] = 0;
-		request_data = pci_alloc_consistent(
-			ioc->pdev, request_data_sz, &request_data_dma);
+		request_data = dma_alloc_coherent(
+			&ioc->pdev->dev, request_data_sz, &request_data_dma, GFP_ATOMIC);
 		if (request_data == NULL) {
 			printk(MPT3SAS_ERR_FMT "%s: failed allocating memory"
 			    " for diag buffers, requested size(%d)\n",
@@ -1892,8 +1893,9 @@ _ctl_diag_register_2(struct MPT3SAS_ADAPTER *ioc,
 
 	if (rc && request_data)
 	{
-		pci_free_consistent(ioc->pdev, request_data_sz,
+		dma_free_coherent(&ioc->pdev->dev, request_data_sz,
 		    request_data, request_data_dma);
+		ioc->diag_buffer[buffer_type] = NULL;
 		ioc->diag_buffer_status[buffer_type] &=
 			~MPT3_DIAG_BUFFER_IS_DRIVER_ALLOCATED;
 	}
@@ -2123,7 +2125,7 @@ _ctl_diag_unregister(struct MPT3SAS_ADAPTER *ioc, void __user *arg)
 	{
 		request_data_sz = ioc->diag_buffer_sz[buffer_type];
 		request_data_dma = ioc->diag_buffer_dma[buffer_type];
-		pci_free_consistent(ioc->pdev, request_data_sz,
+		dma_free_coherent(&ioc->pdev->dev, request_data_sz,
 		    request_data, request_data_dma);
 		ioc->diag_buffer[buffer_type] = NULL;
 		ioc->diag_buffer_status[buffer_type] = 0;
@@ -2280,6 +2282,7 @@ mpt3sas_send_diag_release(struct MPT3SAS_ADAPTER *ioc, u8 buffer_type,
 	ioc->ctl_diag_cmds.status = MPT3_CMD_PENDING;
 	memset(ioc->ctl_diag_cmds.reply, 0, ioc->reply_sz);
 	mpi_request = mpt3sas_base_get_msg_frame(ioc, smid);
+	memset(mpi_request, 0, ioc->request_sz);
 	ioc->ctl_diag_cmds.smid = smid;
 
 	mpi_request->Function = MPI2_FUNCTION_DIAG_RELEASE;
@@ -2549,6 +2552,7 @@ _ctl_diag_read_buffer(struct MPT3SAS_ADAPTER *ioc, void __user *arg)
 	ioc->ctl_diag_cmds.status = MPT3_CMD_PENDING;
 	memset(ioc->ctl_diag_cmds.reply, 0, ioc->reply_sz);
 	mpi_request = mpt3sas_base_get_msg_frame(ioc, smid);
+	memset(mpi_request, 0, ioc->request_sz);
 	ioc->ctl_diag_cmds.smid = smid;
 
 	mpi_request->Function = MPI2_FUNCTION_DIAG_BUFFER_POST;
@@ -2664,6 +2668,62 @@ out:
 		    ioc->name, __func__, arg);
 		return -EFAULT;
 	}
+	return 0;
+}
+
+/**
+ * _ctl_enable_diag_sbr_reload - enable sbr reload bit
+ * @ioc: per adapter object
+ * @arg - user space buffer containing ioctl content
+ *
+ * Enable the SBR reload bit
+ */
+static int
+_ctl_enable_diag_sbr_reload(struct MPT3SAS_ADAPTER *ioc, void __user *arg) {
+
+	u32 ioc_state, host_diagnostic;
+	
+	if (ioc->shost_recovery ||
+	    ioc->pci_error_recovery || ioc->is_driver_loading ||
+	    ioc->remove_host)
+		return -EAGAIN;
+
+	ioc_state = mpt3sas_base_get_iocstate(ioc, 1);
+	if (ioc_state != MPI2_IOC_STATE_OPERATIONAL)
+		return -EFAULT;
+	
+	host_diagnostic = ioc->base_readl(&ioc->chip->HostDiagnostic);
+
+	if (host_diagnostic & MPI2_DIAG_SBR_RELOAD) {
+                return 0;
+        }
+
+	if (mutex_trylock(&ioc->hostdiag_unlock_mutex)) {
+		if(mpt3sas_base_unlock_and_get_host_diagnostic(ioc, &host_diagnostic)){
+			mutex_unlock(&ioc->hostdiag_unlock_mutex);
+			return -EFAULT;
+		}
+	}
+	else
+		return -EAGAIN;
+
+	host_diagnostic |= MPI2_DIAG_SBR_RELOAD;
+	writel(host_diagnostic, &ioc->chip->HostDiagnostic);
+	host_diagnostic = ioc->base_readl(&ioc->chip->HostDiagnostic);
+	mpt3sas_base_lock_host_diagnostic(ioc);
+	mutex_unlock(&ioc->hostdiag_unlock_mutex);
+	
+	if (!(host_diagnostic & MPI2_DIAG_SBR_RELOAD)) {
+		printk(MPT3SAS_ERR_FMT
+		    "%s: Failed to set Diag SBR Reload Bit\n",
+		    ioc->name, __func__);
+		return -EFAULT;
+	}
+
+	printk(MPT3SAS_INFO_FMT
+	    "%s: Successfully set the Diag SBR Reload Bit\n",
+	    ioc->name, __func__);
+
 	return 0;
 }
 
@@ -2848,6 +2908,10 @@ _ctl_ioctl_main(struct file *file, unsigned int cmd, void __user *arg,
 	case MPT3ADDNLDIAGQUERY:
 		if (_IOC_SIZE(cmd) == sizeof(struct mpt3_addnl_diag_query))
 			ret = _ctl_addnl_diag_query(ioc, arg);
+		break;
+	case MPT3ENABLEDIAGSBRRELOAD:
+		if (_IOC_SIZE(cmd) == sizeof(struct mpt3_enable_diag_sbr_reload))
+			ret = _ctl_enable_diag_sbr_reload(ioc, arg);
 		break;
 	default:
 		dctlprintk(ioc, printk(MPT3SAS_INFO_FMT
@@ -4155,7 +4219,7 @@ _ctl_host_trace_buffer_enable_store(struct device *cdev,
 			if ((ioc->diag_buffer_sz[MPI2_DIAG_BUF_TYPE_TRACE] != 0) &&
 			    (ioc->diag_buffer_status[MPI2_DIAG_BUF_TYPE_TRACE] &
 			    MPT3_DIAG_BUFFER_IS_APP_OWNED)) {
-				pci_free_consistent(ioc->pdev,
+				dma_free_coherent(&ioc->pdev->dev,
 				    ioc->diag_buffer_sz[MPI2_DIAG_BUF_TYPE_TRACE],
 				    ioc->diag_buffer[MPI2_DIAG_BUF_TYPE_TRACE],
 				    ioc->diag_buffer_dma[MPI2_DIAG_BUF_TYPE_TRACE]);
@@ -4900,7 +4964,7 @@ mpt3sas_ctl_exit(int enumerate_hba)
 		for (i = 0; i < MPI2_DIAG_BUF_TYPE_COUNT; i++) {
 			if (!ioc->diag_buffer[i])
 				continue;
-			pci_free_consistent(ioc->pdev, ioc->diag_buffer_sz[i],
+			dma_free_coherent(&ioc->pdev->dev, ioc->diag_buffer_sz[i],
 			ioc->diag_buffer[i], ioc->diag_buffer_dma[i]);
 			ioc->diag_buffer[i] = NULL;
 			ioc->diag_buffer_status[i] = 0;

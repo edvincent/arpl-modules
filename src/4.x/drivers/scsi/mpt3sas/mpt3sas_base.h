@@ -79,11 +79,11 @@
 #define MPT3SAS_DRIVER_NAME		"mpt3sas"
 #define MPT3SAS_AUTHOR	"Broadcom Inc. <MPT-FusionLinux.pdl@broadcom.com>"
 #define MPT3SAS_DESCRIPTION	"LSI MPT Fusion SAS 3.0 & SAS 3.5 Device Driver"
-#define MPT3SAS_DRIVER_VERSION		"41.00.00.00"
-#define MPT3SAS_MAJOR_VERSION		41
+#define MPT3SAS_DRIVER_VERSION		"46.00.00.00"
+#define MPT3SAS_MAJOR_VERSION		46
 #define MPT3SAS_MINOR_VERSION           00
-#define MPT3SAS_BUILD_VERSION		0
-#define MPT3SAS_RELEASE_VERSION		0
+#define MPT3SAS_BUILD_VERSION		00
+#define MPT3SAS_RELEASE_VERSION		00
 
 /* mpt2sas driver versioning info */
 #define MPT2SAS_DRIVER_NAME		"mpt2sas"
@@ -154,13 +154,13 @@
 #define RAMP_UP_SUPPORT
 #endif
 
-#if ((LINUX_VERSION_CODE >= KERNEL_VERSION(5,16,0)) || \
-	(defined(CONFIG_SUSE_KERNEL) && ((CONFIG_SUSE_VERSION == 15) && (CONFIG_SUSE_PATCHLEVEL >= 3))) || \
-	(defined(RHEL_MAJOR) && (RHEL_MAJOR == 8) && (RHEL_MINOR >= 6)))
+#if ((LINUX_VERSION_CODE >= KERNEL_VERSION(5,17,0)) || \
+	(defined(RHEL_MAJOR) && (((RHEL_MAJOR == 8) && (RHEL_MINOR >= 6)) \
+	|| ((RHEL_MAJOR == 9) && (RHEL_MINOR >= 1)))))
 #define HOST_TAGSET_SUPPORT
 #endif
 
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5,12,0))
+#if ((LINUX_VERSION_CODE >= KERNEL_VERSION(5,12,0)) && defined(HOST_TAGSET_SUPPORT))
 #define IO_URING_SUPPORT
 #endif
 
@@ -182,6 +182,7 @@
 #define MPT3SAS_KDUMP_SCSI_IO_DEPTH	200
 #define MPT3SAS_HOST_PAGE_SIZE_4K	12
 #define MPT3SAS_NVME_QUEUE_DEPTH	128
+#define MPT3SAS_CMD_PER_LUN		128
 
 #define MPT3SAS_RAID_MAX_SECTORS        8192
 
@@ -1746,6 +1747,7 @@ struct MPT3SAS_ADAPTER {
 	u8		got_task_abort_from_sysfs;
 
 	struct mutex	reset_in_progress_mutex;
+	struct mutex    hostdiag_unlock_mutex;
 	spinlock_t	ioc_reset_in_progress_lock;
 	spinlock_t	hba_hot_unplug_lock;
 	u8		ioc_link_reset_in_progress;
@@ -2103,6 +2105,15 @@ struct STM_CALLBACK {
 };
 #endif
 
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6,1,0))
+#define SCSIH_MAP_QUEUE(shost)          static void scsih_map_queues(shost)
+#define MPT3SAS_RETURN                          return
+#else
+#define SCSIH_MAP_QUEUE(shost)          static int scsih_map_queues(shost)
+#define MPT3SAS_RETURN                          return 0
+#endif
+
+
 /* base shared API */
 extern struct list_head mpt3sas_ioc_list;
 extern spinlock_t gioc_lock;
@@ -2209,6 +2220,9 @@ int mpt3sas_blk_mq_poll(struct Scsi_Host *shost, unsigned int queue_num);
 #endif
 void mpt3sas_base_pause_mq_polling(struct MPT3SAS_ADAPTER *ioc);
 void mpt3sas_base_resume_mq_polling(struct MPT3SAS_ADAPTER *ioc);
+int mpt3sas_base_unlock_and_get_host_diagnostic(struct MPT3SAS_ADAPTER *ioc,
+	u32 *host_diagnostic);
+void mpt3sas_base_lock_host_diagnostic(struct MPT3SAS_ADAPTER *ioc);
 
 /* scsih shared API */
 extern char driver_name[MPT_NAME_LENGTH];

@@ -209,6 +209,11 @@ typedef struct _MPI26_COMPONENT_IMAGE_HEADER
 #define MPI26_IMAGE_HEADER_SIG1_GAS_GAUGE                      (0x20534147)
 #define MPI26_IMAGE_HEADER_SIG1_PBLP                           (0x504C4250)
 #define MPI26_IMAGE_HEADER_SIG1_COREDUMP                       (0x504D5544)     /* little-endian "DUMP" */
+#define MPI26_IMAGE_HEADER_SIG1_CTLR                           (0x524C5443)
+#define MPI26_IMAGE_HEADER_SIG1_DIAG                           (0x47414944)
+#define MPI26_IMAGE_HEADER_SIG1_BOOT                           (0x544F4F42)
+#define MPI26_IMAGE_HEADER_SIG1_BTBL                           (0x4C425442)
+#define MPI26_IMAGE_HEADER_SIG1_DBGD                           (0x44474244)
 
 /**** Definitions for Signature2 field ****/
 #define MPI26_IMAGE_HEADER_SIGNATURE2_VALUE                    (0x50584546)
