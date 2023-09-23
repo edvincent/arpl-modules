@@ -4227,8 +4227,8 @@ void syno_set_block_unique(struct scsi_device *sdev, u8 synoUnique) {
 		snprintf(sdev->syno_block_info, BLOCK_INFO_SIZE, "%sunique=%s\n", sdev->syno_block_info, EBOX_INFO_UNIQUE_DX1222);
 	} else if (IS_SYNOLOGY_DX1215II(synoUnique)) {
 		snprintf(sdev->syno_block_info, BLOCK_INFO_SIZE, "%sunique=%s\n", sdev->syno_block_info, EBOX_INFO_UNIQUE_DX1215II);
-	} else if (IS_SYNOLOGY_RX1223RP(synoUnique)) {
-		snprintf(sdev->syno_block_info, BLOCK_INFO_SIZE, "%sunique=%s\n", sdev->syno_block_info, EBOX_INFO_UNIQUE_RX1223RP);
+	} else if (IS_SYNOLOGY_RX1214(synoUnique)) {
+		snprintf(sdev->syno_block_info, BLOCK_INFO_SIZE, "%sunique=%s\n", sdev->syno_block_info, EBOX_INFO_UNIQUE_RX1214);
 	}
 END:
 	return;
