@@ -459,6 +459,22 @@ struct igc_nfc_rule {
 	u16 action;
 };
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 14, 0)
+#ifndef from_timer
+#define from_timer(var, callback_timer, timer_fieldname) \
+	container_of(callback_timer, typeof(*var), timer_fieldname)
+
+static inline void timer_setup(struct timer_list *timer,
+			       void (*callback)(struct timer_list *),
+			       unsigned int flags)
+{
+	setup_timer(timer, (void (*)(unsigned long))callback,
+		    (unsigned long)timer);
+}
+#endif
+
+#endif
+
 /* IGC supports a total of 32 NFC rules: 16 MAC address based,, 8 VLAN priority
  * based, and 8 ethertype based.
  */
