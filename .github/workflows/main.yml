@@ -20,7 +20,6 @@ jobs:
           ls -d *-*/ | grep -v -e "arpl-modules/"
           for D in `ls -d *-*/`; do
             E=$(echo ${D} | sed 's#/##')
-            #if [ ${E} == "epyc7002-7.1-5.10.55" ]||[ ${E} == "epyc7002-7.2-5.10.55" ]; then
               echo "backup ${E} tcrp modules"
               for file in "$E"/*.ko; do
                 if [ -f "$file" ]; then
@@ -28,16 +27,6 @@ jobs:
                   mv -vf "$file" "$new_name"                
                 fi
               done
-              #if [ -f ./${E}/tn40xx.ko ]; then
-              #  mv -vf ./${E}/tn40xx.ko ./${E}/tn40xx.ko.bak
-              #fi  
-              #if [ -f ./${E}/scsi_mod.ko ]; then
-              #  mv -vf ./${E}/scsi_mod.ko ./${E}/scsi_mod.ko.bak
-              #fi  
-              #if [ -f ./${E}/sd_mod.ko ]; then
-              #  mv -vf ./${E}/sd_mod.ko ./${E}/sd_mod.ko.bak
-              #fi  
-              #rm -f ./${E}/*.ko
               echo "extract ${E} wjz304's arpl-i18n module pack"
               tar -xaf /tmp/${E}.tgz -C ./${E}/
               echo "restore ${E} tcrp modules"
@@ -47,22 +36,11 @@ jobs:
                   mv -vf "$file" "$new_name"                
                 fi
               done
-              #if [ -f ./${E}/tn40xx.ko.bak ]; then
-              #  mv -vf ./${E}/tn40xx.ko.bak ./${E}/tn40xx.ko
-              #fi  
-              #if [ -f ./${E}/scsi_mod.ko.bak ]; then
-              #  mv -vf ./${E}/scsi_mod.ko.bak ./${E}/scsi_mod.ko
-              #fi  
-              #if [ -f ./${E}/sd_mod.ko.bak ]; then
-              #  mv -vf ./${E}/sd_mod.ko.bak ./${E}/sd_mod.ko
-              #fi  
-            #fi
             echo "copy ${E} vanilla module"
             [ -d ./vanilla/${E} ] && cp -vf ./vanilla/${E}/*.ko ./${E}/
             (cd ${E} && tar caf ../${E}.tgz *)
             sha256sum ./${E}.tgz | awk '{print $1}' | awk '{print $1 " '${E}.tgz' modpack.sha256"}' >> files-chksum
           done
-          #(cd thirdparty/firmware && tar caf ../../firmware.tgz *)
           echo "copy wjz304's firmware.tgz"
           cp -vf /tmp/firmware.tgz ./firmware.tgz
           sha256sum ./firmware.tgz | awk '{print $1}' | awk '{print $1 " 'firmware.tgz' firmware.sha256"}' >> files-chksum
@@ -76,9 +54,9 @@ jobs:
           files: |
             *.tgz, files-chksum
 
-      #- name: Trigger Workflow in Another Repository
-      #  uses: peter-evans/repository-dispatch@v1
-      #  with:
-      #    token: ${{ secrets.ACCESS_TOKEN }}
-      #    repository: PeterSuh-Q3/tcrp-modules
-      #    event-type: trigger-workflow
+      - name: Trigger Workflow in Another Repository
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.ACCESS_TOKEN }}
+          repository: PeterSuh-Q3/tcrp-modules
+          event-type: trigger-workflow
