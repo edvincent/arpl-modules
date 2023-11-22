@@ -17,9 +17,8 @@ jobs:
           curl -kL https://github.com/wjz304/rr-modules/releases/latest/download/modules.zip -o /tmp/modules.zip
           echo "extract wjz304's modules.zip ${E}"
           unzip /tmp/modules.zip -d "/tmp/" >/dev/null 2>&1
-          #ls -d *-*/ | grep -v -e "arpl-modules/"
-          ls -d *-*/ | grep -v -e "arpl-modules/" | grep epyc7002
-          for D in `ls -d *-*/`; do
+          ls -d *-*/ | grep -v -e "arpl-modules/"
+          for D in `ls -d *-*/ | grep epyc7002`; do
             E=$(echo ${D} | sed 's#/##')
               echo "backup ${E} tcrp modules"
               for file in "$E"/*.ko; do
@@ -57,9 +56,9 @@ jobs:
           files: |
             *.tgz, files-chksum
 
-      - name: Trigger Workflow in Another Repository
-        uses: peter-evans/repository-dispatch@v1
-        with:
-          token: ${{ secrets.ACCESS_TOKEN }}
-          repository: PeterSuh-Q3/tcrp-modules
-          event-type: trigger-workflow
+      #- name: Trigger Workflow in Another Repository
+      #  uses: peter-evans/repository-dispatch@v1
+      #  with:
+      #    token: ${{ secrets.ACCESS_TOKEN }}
+      #    repository: PeterSuh-Q3/tcrp-modules
+      #    event-type: trigger-workflow
