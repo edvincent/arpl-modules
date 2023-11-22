@@ -17,7 +17,8 @@ jobs:
           curl -kL https://github.com/wjz304/rr-modules/releases/latest/download/modules.zip -o /tmp/modules.zip
           echo "extract wjz304's modules.zip ${E}"
           unzip /tmp/modules.zip -d "/tmp/" >/dev/null 2>&1
-          ls -d *-*/ | grep -v -e "arpl-modules/"
+          #ls -d *-*/ | grep -v -e "arpl-modules/"
+          ls -d *-*/ | grep -v -e "arpl-modules/" | grep epyc7002
           for D in `ls -d *-*/`; do
             E=$(echo ${D} | sed 's#/##')
               echo "backup ${E} tcrp modules"
