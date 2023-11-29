@@ -44,9 +44,9 @@ jobs:
             (cd ${E} && tar caf ../${E}.tgz *)
             sha256sum ./${E}.tgz | awk '{print $1}' | awk '{print $1 " '${E}.tgz' modpack.sha256"}' >> files-chksum
           done
-          echo "copy wjz304's firmware.tgz"
-          cp -vf /tmp/firmware.tgz ./firmware.tgz
-          sha256sum ./firmware.tgz | awk '{print $1}' | awk '{print $1 " 'firmware.tgz' firmware.sha256"}' >> files-chksum
+          #echo "copy wjz304's firmware.tgz"
+          #cp -vf /tmp/firmware.tgz ./firmware.tgz
+          #sha256sum ./firmware.tgz | awk '{print $1}' | awk '{print $1 " 'firmware.tgz' firmware.sha256"}' >> files-chksum
           cat files-chksum
 
       # Publish a release if is a tag
