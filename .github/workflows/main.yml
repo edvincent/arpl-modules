@@ -14,9 +14,10 @@ jobs:
 
       - name: Tar modules
         run: |
-          curl -kL https://github.com/wjz304/rr-modules/releases/latest/download/modules.zip -o /tmp/modules.zip
-          echo "extract wjz304's modules.zip ${E}"
-          unzip /tmp/modules.zip -d "/tmp/" >/dev/null 2>&1
+          curl -kL https://github.com/PeterSuh-Q3/arpl-modules/releases/latest/download/epyc7002-7.1-5.10.55.tgz -o /tmp/epyc7002-7.1-5.10.55.tgz
+          curl -kL https://github.com/PeterSuh-Q3/arpl-modules/releases/latest/download/epyc7002-7.2-5.10.55.tgz -o /tmp/epyc7002-7.2-5.10.55.tgz
+          #echo "extract last module pack"
+          #unzip /tmp/modules.zip -d "/tmp/" >/dev/null 2>&1
           ls -d *-*/ | grep -v -e "arpl-modules/"
           for D in `ls -d *-*/ | grep epyc7002`; do
             E=$(echo ${D} | sed 's#/##')
