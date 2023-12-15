@@ -47,16 +47,17 @@ jobs:
             sha256sum ./${E}.tgz | awk '{print $1}' | awk '{print $1 " '${E}.tgz' modpack.sha256"}' >> files-chksum
           done
 
-          echo "download latest epyc7002 module pack"          
+          echo "download latest epyc7002 module pack"
           curl -kLO https://github.com/PeterSuh-Q3/arpl-modules/releases/latest/download/epyc7002-7.1-5.10.55.tgz
           curl -kLO https://github.com/PeterSuh-Q3/arpl-modules/releases/latest/download/epyc7002-7.2-5.10.55.tgz
           
           sha256sum ./epyc7002-7.1-5.10.55.tgz | awk '{print $1}' | awk '{print $1 " 'epyc7002-7.1-5.10.55.tgz' modpack.sha256"}' >> files-chksum
           sha256sum ./epyc7002-7.2-5.10.55.tgz | awk '{print $1}' | awk '{print $1 " 'epyc7002-7.2-5.10.55.tgz' modpack.sha256"}' >> files-chksum
+
+          echo "download latest firmware.tgz"
+          curl -kLO https://github.com/PeterSuh-Q3/arpl-modules/releases/latest/download/firmware.tgz          
+          sha256sum ./firmware.tgz | awk '{print $1}' | awk '{print $1 " 'firmware.tgz' firmware.sha256"}' >> files-chksum
           
-          #echo "copy rr's firmware.tgz"
-          #cp -vf /tmp/firmware.tgz ./firmware.tgz
-          #sha256sum ./firmware.tgz | awk '{print $1}' | awk '{print $1 " 'firmware.tgz' firmware.sha256"}' >> files-chksum
           cat files-chksum
 
       # Publish a release if is a tag
