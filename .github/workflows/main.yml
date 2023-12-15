@@ -51,8 +51,8 @@ jobs:
           curl -kLO https://github.com/PeterSuh-Q3/arpl-modules/releases/latest/download/epyc7002-7.1-5.10.55.tgz
           curl -kLO https://github.com/PeterSuh-Q3/arpl-modules/releases/latest/download/epyc7002-7.2-5.10.55.tgz
           
-          sha256sum ./epyc7002-7.1-5.10.55.tgz.tgz | awk '{print $1}' | awk '{print $1 " 'epyc7002-7.1-5.10.55.tgz.tgz' modpack.sha256"}' >> files-chksum
-          sha256sum ./epyc7002-7.2-5.10.55.tgz.tgz | awk '{print $1}' | awk '{print $1 " 'epyc7002-7.2-5.10.55.tgz.tgz' modpack.sha256"}' >> files-chksum
+          sha256sum ./epyc7002-7.1-5.10.55.tgz | awk '{print $1}' | awk '{print $1 " 'epyc7002-7.1-5.10.55.tgz' modpack.sha256"}' >> files-chksum
+          sha256sum ./epyc7002-7.2-5.10.55.tgz | awk '{print $1}' | awk '{print $1 " 'epyc7002-7.2-5.10.55.tgz' modpack.sha256"}' >> files-chksum
           
           #echo "copy rr's firmware.tgz"
           #cp -vf /tmp/firmware.tgz ./firmware.tgz
