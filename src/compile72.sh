@@ -11,7 +11,7 @@ TOOLKIT_VER="7.2"
 #fi
 
 echo -e "Compiling modules..."
-while read PLATFORM KVER; do
+while read PLATFORM72 KVER; do
   [ -n "$1" -a "${PLATFORM}" != "$1" ] && continue
   DIR="${KVER:0:1}.x"
   [ ! -d "${PWD}/${DIR}" ] && continue
