@@ -16,8 +16,8 @@ jobs:
         run: |
           #curl -kL https://github.com/PeterSuh-Q3/arpl-modules/releases/latest/download/epyc7002-7.1-5.10.55.tgz -o /tmp/epyc7002-7.1-5.10.55.tgz
           #curl -kL https://github.com/PeterSuh-Q3/arpl-modules/releases/latest/download/epyc7002-7.2-5.10.55.tgz -o /tmp/epyc7002-7.2-5.10.55.tgz
-          ls -d *-*/ | grep -v -e braswell -e broadwellnkv2 -e broadwellntbap -e purley -e epyc7002
-          for D in `ls -d *-*/ | grep -v -e braswell -e broadwellnkv2 -e broadwellntbap -e purley -e epyc7002`; do
+          ls -d *-*/ | grep -v -e braswell -e broadwellnkv2 -e broadwellntbap -e purley
+          for D in `ls -d *-*/ | grep -v -e braswell -e broadwellnkv2 -e broadwellntbap -e purley`; do
             E=$(echo ${D} | sed 's#/##')
               echo "backup ${E} tcrp modules"
               for file in "$E"/*.ko; do
@@ -47,12 +47,11 @@ jobs:
             sha256sum ./${E}.tgz | awk '{print $1}' | awk '{print $1 " '${E}.tgz' modpack.sha256"}' >> files-chksum
           done
 
-          echo "download latest epyc7002 module pack"
-          curl -kLO https://github.com/PeterSuh-Q3/arpl-modules/releases/latest/download/epyc7002-7.1-5.10.55.tgz
-          curl -kLO https://github.com/PeterSuh-Q3/arpl-modules/releases/latest/download/epyc7002-7.2-5.10.55.tgz
-          
-          sha256sum ./epyc7002-7.1-5.10.55.tgz | awk '{print $1}' | awk '{print $1 " 'epyc7002-7.1-5.10.55.tgz' modpack.sha256"}' >> files-chksum
-          sha256sum ./epyc7002-7.2-5.10.55.tgz | awk '{print $1}' | awk '{print $1 " 'epyc7002-7.2-5.10.55.tgz' modpack.sha256"}' >> files-chksum
+          #echo "download latest epyc7002 module pack"
+          #curl -kLO https://github.com/PeterSuh-Q3/arpl-modules/releases/latest/download/epyc7002-7.1-5.10.55.tgz
+          #curl -kLO https://github.com/PeterSuh-Q3/arpl-modules/releases/latest/download/epyc7002-7.2-5.10.55.tgz
+          #sha256sum ./epyc7002-7.1-5.10.55.tgz | awk '{print $1}' | awk '{print $1 " 'epyc7002-7.1-5.10.55.tgz' modpack.sha256"}' >> files-chksum
+          #sha256sum ./epyc7002-7.2-5.10.55.tgz | awk '{print $1}' | awk '{print $1 " 'epyc7002-7.2-5.10.55.tgz' modpack.sha256"}' >> files-chksum
 
           echo "download latest firmware.tgz"
           curl -kLO https://github.com/PeterSuh-Q3/arpl-modules/releases/latest/download/firmware.tgz          
