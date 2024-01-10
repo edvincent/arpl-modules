@@ -2,7 +2,7 @@
 
 set -e
 
-TOOLKIT_VER="7.1"
+TOOLKIT_VER="7.2"
 
 #if [ -f ../../arpl/PLATFORMS ]; then
 #  cp ../../arpl/PLATFORMS PLATFORMS
