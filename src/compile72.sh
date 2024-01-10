@@ -11,7 +11,7 @@ TOOLKIT_VER="7.2"
 #fi
 
 echo -e "Compiling modules..."
-while read PLATFORM72 KVER; do
+while read PLATFORM KVER; do
   [ -n "$1" -a "${PLATFORM}" != "$1" ] && continue
   DIR="${KVER:0:1}.x"
   [ ! -d "${PWD}/${DIR}" ] && continue
@@ -45,5 +45,5 @@ while read PLATFORM72 KVER; do
       [[ -f ${PWD}/../${PLATFORM}-${KVER}/i2c-algo-bit.ko ]] && rm ${PWD}/../${PLATFORM_DIR}/i2c-algo-bit.ko
   done
   rm -rf /tmp/${PLATFORM}-${KVER}
-done < PLATFORMS
+done < PLATFORMS72
 
