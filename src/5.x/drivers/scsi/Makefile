@@ -33,7 +33,7 @@
 #obj-$(CONFIG_SCSI_FC_ATTRS) 	+= scsi_transport_fc.o
 #obj-$(CONFIG_SCSI_ISCSI_ATTRS)	+= scsi_transport_iscsi.o
 obj-$(CONFIG_SCSI_SAS_ATTRS)	+= scsi_transport_sas.o
-obj-$(CONFIG_SCSI_SAS_LIBSAS)	+= libsas/
+obj-y	+= libsas/
 #obj-$(CONFIG_SCSI_SRP_ATTRS)	+= scsi_transport_srp.o
 #obj-$(CONFIG_SCSI_DH)		+= device_handler/
 
@@ -72,7 +72,7 @@ obj-$(CONFIG_SCSI_SAS_LIBSAS)	+= libsas/
 #obj-$(CONFIG_SCSI_AIC7XXX)	+= aic7xxx/
 #obj-$(CONFIG_SCSI_AIC79XX)	+= aic7xxx/
 #obj-$(CONFIG_SCSI_AACRAID)	+= aacraid/
-obj-$(CONFIG_SCSI_AIC94XX)	+= aic94xx/
+obj-y	+= aic94xx/
 #obj-$(CONFIG_SCSI_PM8001)	+= pm8001/
 #obj-$(CONFIG_SCSI_ISCI)		+= isci/
 #obj-$(CONFIG_SCSI_IPS)		+= ips.o
