@@ -54,9 +54,9 @@ jobs:
           #sha256sum ./epyc7002-7.2-5.10.55.tgz | awk '{print $1}' | awk '{print $1 " 'epyc7002-7.2-5.10.55.tgz' modpack.sha256"}' >> files-chksum
 
           echo "download latest firmware.tgz"
-          curl -kLO https://github.com/PeterSuh-Q3/arpl-modules/releases/latest/download/firmware.tgz
+          curl -kL https://github.com/PeterSuh-Q3/arpl-modules/releases/latest/download/firmware.tgz -o /tmp/firmware.tgz
           echo "extract latest firmware.tgz"
-          tar -xaf ./firmware.tgz -C ./firmware/
+          tar -xaf /tmp/firmware.tgz -C ./firmware/
           echo "copy thirdparty i915 firmware"
           [ -d ./thirdparty/firmware ] && cp -vrf ./thirdparty/firmware/* ./firmware/
           (cd firmware && tar caf ../firmware.tgz *)
