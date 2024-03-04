@@ -56,7 +56,7 @@ jobs:
           echo "download latest firmware.tgz"
           curl -kL https://github.com/PeterSuh-Q3/arpl-modules/releases/latest/download/firmware.tgz -o /tmp/firmware.tgz
           echo "extract latest firmware.tgz"
-          ll /tmp
+          ls -l /tmp
           tar -xaf /tmp/firmware.tgz -C ./firmware/
           echo "copy thirdparty i915 firmware"
           [ -d ./thirdparty/firmware ] && cp -vrf ./thirdparty/firmware/* ./firmware/
